@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+<h1>Student Login</h1>
+
+{% if messages %}
+    {% for message in messages %}
+        <p style="color:red">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Login
+    </button>
+
+</form>
+
+<p>
+    Don't have an account?
+    <a href="{% url 'register' %}">
+        Register
+    </a>
+</p>
+
+</body>
+</html>
