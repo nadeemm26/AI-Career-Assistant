@@ -28,6 +28,7 @@
                 <th>Type</th>
                 <th>Status</th>
                 <th>Uploaded</th>
+                <th>Actions</th>
             </tr>
 
         </thead>
@@ -48,6 +49,17 @@
 
             <td>{{ resume.uploaded_at }}</td>
 
+            <td>
+                <a href="{% url 'download_resume' resume.id %}" class="btn btn-sm btn-success">
+                    Download
+                </a>
+
+                <a href="{% url 'delete_resume' resume.id %}"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Delete this resume?');">
+                    Delete
+                </a>
+            </td>
         </tr>
 
         {% endfor %}
