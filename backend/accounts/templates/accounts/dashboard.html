@@ -1,19 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Welcome {{ request.user.full_name }}</h1>
+{% block title %}Dashboard{% endblock %}
 
-<p>Email: {{ request.user.email }}</p>
+{% block content %}
 
-<p>Role: {{ request.user.role }}</p>
+<div class="container-fluid">
 
-<p>
-    Login Successful 🎉
-</p>
+    <h2 class="mb-4">
+        Welcome, {{ request.user.full_name }} 👋
+    </h2>
 
-</body>
-</html>
+    <div class="row">
+
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6>Total Resumes</h6>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6>Average ATS</h6>
+                    <h2>0%</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6>Missing Skills</h6>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6>Recommended Courses</h6>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
