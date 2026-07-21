@@ -1,87 +1,193 @@
-<div class="col-md-2 bg-dark min-vh-100">
+<aside class="col-md-3 col-lg-2 sidebar">
 
-<ul class="nav flex-column mt-4">
+    <div class="sidebar-content">
 
-<li class="nav-item">
+        <div class="sidebar-heading">
+            <span class="sidebar-heading-text">
+                MAIN MENU
+            </span>
+        </div>
 
-<a class="nav-link text-white" href="#">
+        <ul class="nav nav-pills flex-column sidebar-menu">
 
-🏠 Dashboard
+            <li class="nav-item">
 
-</a>
+                <a
+                    class="nav-link
+                    {% if request.resolver_match.url_name == 'dashboard' %}
+                        active
+                    {% endif %}"
+                    href="{% url 'dashboard' %}"
+                >
 
-</li>
+                    <span class="menu-icon">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                    </span>
 
-<li>
+                    <span>Dashboard</span>
 
-<a class="nav-link text-white" href="#">
+                </a>
 
-📄 Resume
+            </li>
 
-</a>
+            <li class="nav-item">
 
-</li>
+                <a
+                    class="nav-link
+                    {% if request.resolver_match.url_name == 'resume_list' or request.resolver_match.url_name == 'upload_resume' %}
+                        active
+                    {% endif %}"
+                    href="{% url 'resume:resume_list' %}"
+                >
 
-<li>
+                    <span class="menu-icon">
+                        <i class="bi bi-file-earmark-person-fill"></i>
+                    </span>
 
-<a class="nav-link text-white" href="#">
+                    <span>My Resumes</span>
 
-📊 ATS Analysis
+                </a>
 
-</a>
+            </li>
 
-</li>
+            <li class="nav-item">
 
-<li>
+    <a
+        class="nav-link {% if request.resolver_match.app_name == 'ats' %}active{% endif %}"
+        href="{% url 'ats:analysis_list' %}"
+    >
 
-<a class="nav-link text-white" href="#">
+        <span class="menu-icon">
+            <i class="bi bi-graph-up-arrow"></i>
+        </span>
 
-💼 Job Roles
+        <span>ATS Analysis</span>
 
-</a>
-
-</li>
-
-<li>
-
-<a class="nav-link text-white" href="#">
-
-🎓 Courses
-
-</a>
-
-</li>
-
-<li>
-
-<a class="nav-link text-white" href="#">
-
-📑 Reports
-
-</a>
-
-</li>
-
-<li>
-
-<a class="nav-link text-white" href="#">
-
-⚙ Profile
-
-</a>
+    </a>
 
 </li>
 
-<li>
+            <li class="nav-item">
 
-<a class="nav-link text-danger" href="#">
+                <a
+                    class="nav-link
+                    {% if request.resolver_match.url_name == 'job_roles' %}
+                        active
+                    {% endif %}"
+                    href="{% url 'job_roles' %}"
+                >
 
-🚪 Logout
+                    <span class="menu-icon">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </span>
 
-</a>
+                    <span>Job Roles</span>
 
-</li>
+                </a>
 
-</ul>
+            </li>
 
-</div>
+            <li class="nav-item">
+
+                <a
+                    class="nav-link
+                    {% if request.resolver_match.url_name == 'courses' %}
+                        active
+                    {% endif %}"
+                    href="{% url 'courses' %}"
+                >
+
+                    <span class="menu-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </span>
+
+                    <span>Courses</span>
+
+                </a>
+
+            </li>
+
+            <li class="nav-item">
+
+                <a
+                    class="nav-link
+                    {% if request.resolver_match.url_name == 'reports' %}
+                        active
+                    {% endif %}"
+                    href="{% url 'reports' %}"
+                >
+
+                    <span class="menu-icon">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                    </span>
+
+                    <span>Reports</span>
+
+                </a>
+
+            </li>
+
+        </ul>
+
+        <div class="sidebar-heading account-heading">
+
+            <span class="sidebar-heading-text">
+                ACCOUNT
+            </span>
+
+        </div>
+
+        <ul class="nav nav-pills flex-column sidebar-menu">
+
+            <li class="nav-item">
+
+                <a
+                    class="nav-link
+                    {% if request.resolver_match.url_name == 'profile' %}
+                        active
+                    {% endif %}"
+                    href="{% url 'profile' %}"
+                >
+
+                    <span class="menu-icon">
+                        <i class="bi bi-person-circle"></i>
+                    </span>
+
+                    <span>Profile</span>
+
+                </a>
+
+            </li>
+
+            <li class="nav-item">
+
+                <form
+                    method="POST"
+                    action="{% url 'logout' %}"
+                    class="logout-form"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="nav-link logout-button"
+                    >
+
+                        <span class="menu-icon">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </span>
+
+                        <span>Logout</span>
+
+                    </button>
+
+                </form>
+
+            </li>
+
+        </ul>
+
+    </div>
+
+</aside>

@@ -1,55 +1,3 @@
-# from django.http import JsonResponse
-# from resume.models import Resume
-# from jobs.models import JobRole
-
-# from .parser import ResumeParser
-# from .skill_extractor import SkillExtractor
-# from .ats_calculator import ATSCalculator
-
-# def test_parser(request):
-
-#     resume = Resume.objects.last()
-
-#     if not resume:
-#         return JsonResponse({"error": "No Resume Found"})
-
-#     text = ResumeParser.extract_text(
-#         resume.resume_file.path
-#     )
-
-#     found_skills = SkillExtractor.extract(text)
-
-#     job = JobRole.objects.get(title="Python Developer")
-
-#     required_skills = job.required_skills.select_related("skill")
-
-#     required = [
-#         item.skill
-#         for item in required_skills
-#     ]
-
-#     score = ATSCalculator.calculate(
-#         found_skills,
-#         required
-#     )
-
-#     missing = [
-#         skill.name
-#         for skill in required
-#         if skill.name.lower() not in [
-#             s.lower() for s in found_skills
-#         ]
-#     ]
-
-#     return JsonResponse({
-#         "job_role": job.title,
-#         "ats_score": score,
-#         "found_skills": found_skills,
-#         "missing_skills": missing,
-#         "required_skills": [
-#             skill.name for skill in required
-#         ]
-#     })
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
@@ -168,5 +116,26 @@ def analysis_result(request, resume_id):
     return render(
         request,
         "ats/analysis_result.html",
+        context
+    )
+
+@login_required
+def analysis_list(request):
+
+    resumes = Resume.objects.filter(
+        user=request.user
+    ).select_related(
+        "analysis"
+    ).order_by(
+        "-uploaded_at"
+    )
+
+    context = {
+        "resumes": resumes
+    }
+
+    return render(
+        request,
+        "ats/analysis_list.html",
         context
     )

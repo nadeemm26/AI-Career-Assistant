@@ -19,11 +19,37 @@ class RegistrationForm(forms.ModelForm):
 
     class Meta:
         model = User
+
         fields = [
             "full_name",
             "email",
             "phone_number",
         ]
+
+        widgets = {
+
+            "full_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter Full Name"
+                }
+         ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter Email Address"
+                }
+            ),
+
+            "phone_number": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter Mobile Number"
+                }
+            ),
+
+        }
 
     def clean_email(self):
         email = self.cleaned_data.get("email")

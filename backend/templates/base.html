@@ -1,51 +1,314 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
 
-<title>{% block title %}AI Career Assistant{% endblock %}</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>
+        {% block title %}
+            AI Career Assistant
+        {% endblock %}
+    </title>
 
-{% block css %}
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-{% endblock %}
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <style>
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --sidebar-background: #111827;
+            --sidebar-hover: #1f2937;
+            --page-background: #f3f6fb;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page-background);
+            color: var(--text-dark);
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        .app-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            min-height: 72px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #4f46e5
+                );
+            box-shadow:
+                0 4px 20px
+                rgba(37, 99, 235, 0.18);
+        }
+
+        .navbar-brand {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .navbar-brand:hover {
+            color: #ffffff;
+        }
+
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background:
+                rgba(255, 255, 255, 0.17);
+        }
+
+        .user-info {
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .user-name {
+            display: block;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-role {
+            color:
+                rgba(255, 255, 255, 0.72);
+            font-size: 0.75rem;
+        }
+
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border: 2px solid
+                rgba(255, 255, 255, 0.55);
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .sidebar {
+            min-height:
+                calc(100vh - 72px);
+            padding: 0;
+            background:
+                var(--sidebar-background);
+        }
+
+        .sidebar-content {
+            position: sticky;
+            top: 72px;
+            padding: 24px 14px;
+        }
+
+        .sidebar-heading {
+            padding: 0 14px 10px;
+        }
+
+        .account-heading {
+            margin-top: 26px;
+        }
+
+        .sidebar-heading-text {
+            color: #6b7280;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+        }
+
+        .sidebar-menu {
+            gap: 6px;
+        }
+
+        .sidebar-menu .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 48px;
+            padding: 11px 14px;
+            border-radius: 11px;
+            color: #cbd5e1;
+            font-size: 0.91rem;
+            font-weight: 500;
+            transition:
+                background 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .sidebar-menu .nav-link:hover {
+            color: #ffffff;
+            background:
+                var(--sidebar-hover);
+            transform: translateX(3px);
+        }
+
+        .sidebar-menu .nav-link.active {
+            color: #ffffff;
+            background:
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #4f46e5
+                );
+            box-shadow:
+                0 8px 18px
+                rgba(37, 99, 235, 0.25);
+        }
+
+        .menu-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            font-size: 1.05rem;
+        }
+
+        .logout-form {
+            width: 100%;
+        }
+
+        .logout-button {
+            border: none;
+            background: transparent;
+            text-align: left;
+        }
+
+        .logout-button:hover {
+            color: #fca5a5 !important;
+            background:
+                rgba(239, 68, 68, 0.12) !important;
+        }
+
+        .main-content {
+            min-height:
+                calc(100vh - 72px);
+            padding: 30px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            margin-bottom: 6px;
+            font-size: 1.7rem;
+            font-weight: 750;
+        }
+
+        .page-description {
+            margin-bottom: 0;
+            color: var(--text-muted);
+        }
+
+        .app-card {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow:
+                0 8px 24px
+                rgba(15, 23, 42, 0.05);
+        }
+
+        @media (max-width: 767.98px) {
+
+            .sidebar {
+                min-height: auto;
+            }
+
+            .sidebar-content {
+                position: static;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+        }
+
+    </style>
+
+    {% block css %}
+    {% endblock %}
 
 </head>
 
-<body class="bg-light">
+<body>
 
-{% include "includes/navbar.html" %}
+    {% include "includes/navbar.html" %}
 
-<div class="container-fluid">
+    <div class="container-fluid">
 
-<div class="row">
+        <div class="row">
 
-{% include "includes/sidebar.html" %}
+            {% if request.user.is_authenticated %}
 
-<main class="col-md-10 p-4">
+                {% include "includes/sidebar.html" %}
 
-{% include "includes/messages.html" %}
+                <main class="col-md-9 col-lg-10 main-content">
 
-{% block content %}
+            {% else %}
 
-{% endblock %}
+                <main class="col-12 main-content">
 
-</main>
+            {% endif %}
 
-</div>
+                {% include "includes/messages.html" %}
 
-</div>
+                {% block content %}
+                {% endblock %}
 
-{% include "includes/footer.html" %}
+            </main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+        </div>
 
-{% block js %}
+    </div>
 
-{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block js %}
+    {% endblock %}
 
 </body>
+
 </html>

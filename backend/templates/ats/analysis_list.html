@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}
+ATS Analysis | AI Career Assistant
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+    <div>
+
+        <h1 class="page-title">
+            ATS Analysis
+        </h1>
+
+        <p class="page-description">
+            Select a resume to view its ATS analysis and skill insights.
+        </p>
+
+    </div>
+
+    <a
+        href="{% url 'resume:upload_resume' %}"
+        class="btn btn-primary px-4"
+    >
+        <i class="bi bi-cloud-arrow-up-fill me-2"></i>
+        Upload Resume
+    </a>
+
+</div>
+
+
+<div class="row g-4">
+
+    {% for resume in resumes %}
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="app-card ats-resume-card h-100 p-4">
+
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+
+                    <div class="ats-file-icon">
+
+                        {% if "pdf" in resume.file_type|lower %}
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        {% else %}
+                            <i class="bi bi-file-earmark-word-fill"></i>
+                        {% endif %}
+
+                    </div>
+
+                    {% if resume.status == "completed" %}
+
+                        <span class="badge rounded-pill text-bg-success">
+                            Completed
+                        </span>
+
+                    {% elif resume.status == "processing" %}
+
+                        <span class="badge rounded-pill text-bg-warning">
+                            Processing
+                        </span>
+
+                    {% elif resume.status == "failed" %}
+
+                        <span class="badge rounded-pill text-bg-danger">
+                            Failed
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge rounded-pill text-bg-secondary">
+                            Uploaded
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <h5 class="resume-name">
+                    {{ resume.original_filename }}
+                </h5>
+
+                <div class="resume-meta">
+
+                    <span>
+                        <i class="bi bi-file-earmark me-1"></i>
+                        {{ resume.file_type|upper }}
+                    </span>
+
+                    <span>
+                        <i class="bi bi-calendar3 me-1"></i>
+                        {{ resume.uploaded_at|date:"d M Y" }}
+                    </span>
+
+                </div>
+
+
+                <div class="ats-card-divider"></div>
+
+
+                {% if resume.status == "completed" %}
+
+                    <a
+                        href="{% url 'ats:analysis_result' resume.id %}"
+                        class="btn btn-primary w-100"
+                    >
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                        View ATS Analysis
+                    </a>
+
+                {% elif resume.status == "processing" %}
+
+                    <button
+                        type="button"
+                        class="btn btn-warning w-100"
+                        disabled
+                    >
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Analysis Processing
+                    </button>
+
+                {% elif resume.status == "failed" %}
+
+                    <a
+                        href="{% url 'resume:resume_list' %}"
+                        class="btn btn-outline-danger w-100"
+                    >
+                        <i class="bi bi-arrow-repeat me-2"></i>
+                        Try Again
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'resume:resume_list' %}"
+                        class="btn btn-outline-primary w-100"
+                    >
+                        <i class="bi bi-stars me-2"></i>
+                        Start Analysis
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="app-card empty-analysis-state p-5 text-center">
+
+                <div class="empty-analysis-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+
+                <h3 class="fw-bold mt-4">
+                    No Resume Available
+                </h3>
+
+                <p class="text-muted mx-auto" style="max-width: 540px;">
+                    Upload your resume first. After processing, your ATS score,
+                    detected skills and missing skills will appear here.
+                </p>
+
+                <a
+                    href="{% url 'resume:upload_resume' %}"
+                    class="btn btn-primary px-4 mt-2"
+                >
+                    <i class="bi bi-cloud-arrow-up-fill me-2"></i>
+                    Upload Your First Resume
+                </a>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
+
+
+{% block css %}
+
+<style>
+
+    .ats-resume-card {
+        position: relative;
+        overflow: hidden;
+        transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease;
+    }
+
+    .ats-resume-card::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        content: "";
+        background:
+            linear-gradient(
+                90deg,
+                #2563eb,
+                #4f46e5,
+                #7c3aed
+            );
+    }
+
+    .ats-resume-card:hover {
+        transform: translateY(-6px);
+        border-color: #bfdbfe;
+        box-shadow:
+            0 16px 34px
+            rgba(15, 23, 42, 0.1);
+    }
+
+    .ats-file-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 58px;
+        height: 58px;
+        border-radius: 17px;
+        color: #2563eb;
+        background: #eff6ff;
+        font-size: 1.55rem;
+    }
+
+    .resume-name {
+        min-height: 48px;
+        margin-bottom: 15px;
+        color: #111827;
+        font-size: 1.02rem;
+        font-weight: 700;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .resume-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: #6b7280;
+        font-size: 0.84rem;
+    }
+
+    .ats-card-divider {
+        height: 1px;
+        margin: 22px 0;
+        background: #eef2f7;
+    }
+
+    .empty-analysis-state {
+        padding-top: 70px !important;
+        padding-bottom: 70px !important;
+    }
+
+    .empty-analysis-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 90px;
+        height: 90px;
+        border-radius: 28px;
+        color: #4f46e5;
+        background:
+            linear-gradient(
+                135deg,
+                #eff6ff,
+                #f5f3ff
+            );
+        font-size: 2.3rem;
+    }
+
+</style>
+
+{% endblock %}

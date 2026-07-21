@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login , logout
 from django.contrib.auth.decorators import login_required
 
 from .forms import RegistrationForm, LoginForm
@@ -78,5 +78,27 @@ def login_view(request):
     )
 
 @login_required
-def dashboard(request):
-    return render(request, "accounts/dashboard.html")
+def profile(request):
+    return render(
+        request,
+        "accounts/profile.html",
+        {
+            "user": request.user
+        }
+    )
+
+@login_required
+def logout_view(request):
+
+    if request.method == "POST":
+
+        logout(request)
+
+        messages.success(
+            request,
+            "You have been logged out successfully."
+        )
+
+        return redirect("login")
+
+    return redirect("dashboard")

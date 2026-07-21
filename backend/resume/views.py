@@ -133,5 +133,5 @@ def delete_resume(request, pk):
         "Resume deleted successfully."
     )
 
-    return redirect("resume_list")
+    return redirect("resume:resume_list")
 
