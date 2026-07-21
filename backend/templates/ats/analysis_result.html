@@ -534,6 +534,18 @@ AI Resume Analysis Report
         border: 1px solid var(--border);
     }
 
+    .analytics-card {
+        margin-bottom: 28px;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 480px;
+        height: 320px;
+        margin: 0 auto;
+    }
+
     @media (max-width: 992px) {
         .summary-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -657,6 +669,21 @@ AI Resume Analysis Report
                 <p>Recommendations</p>
             </article>
 
+        </section>
+
+        <section class="section-card analytics-card">
+            <div class="section-heading">
+                <div>
+                  <h2>Skills Analytics</h2>
+                  <p>
+                     Visual comparison of detected and missing job-role skills.
+                  </p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="skillsChart"></canvas>
+            </div>
         </section>
 
         <div class="content-grid">
@@ -921,5 +948,93 @@ AI Resume Analysis Report
         </div>
     </div>
 </div>
+
+<!-- JS FOR CHARTS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chartElement = document.getElementById("skillsChart");
+
+        if (!chartElement) {
+            return;
+        }
+
+        const detectedSkills = Number(
+            "{{ extracted_skills|length|default:0 }}"
+        );
+
+        const missingSkills = Number(
+            "{{ missing_skills|length|default:0 }}"
+        );
+
+        new Chart(chartElement, {
+            type: "doughnut",
+
+            data: {
+                labels: [
+                    "Detected Skills",
+                    "Missing Skills"
+                ],
+
+                datasets: [
+                    {
+                        data: [
+                            detectedSkills,
+                            missingSkills
+                        ],
+
+                        backgroundColor: [
+                            "#22c55e",
+                            "#ef4444"
+                        ],
+
+                        borderColor: [
+                            "#ffffff",
+                            "#ffffff"
+                        ],
+
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+
+                plugins: {
+                    legend: {
+                        position: "bottom",
+
+                        labels: {
+                            usePointStyle: true,
+                            padding: 22,
+                            font: {
+                                size: 13,
+                                weight: "600"
+                            }
+                        }
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return (
+                                    context.label +
+                                    ": " +
+                                    context.raw +
+                                    " skills"
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 
 {% endblock %}
