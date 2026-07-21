@@ -19,4 +19,9 @@ class ResumeService:
 
         resume.save()
 
+        from ats.services import ATSService
+
+        ATSService.analyze_resume(resume)
+
         return resume
+

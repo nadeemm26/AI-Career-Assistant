@@ -1,3 +1,12 @@
 from django.contrib import admin
+from .models import (
+    SkillCategory,
+    Skill,
+    JobRole,
+    JobRequiredSkill,
+)
 
-# Register your models here.
+admin.site.register(SkillCategory)
+admin.site.register(Skill)
+admin.site.register(JobRole)
+admin.site.register(JobRequiredSkill)

@@ -10,9 +10,7 @@
 
         <h2>My Resumes</h2>
 
-        <a href="{% url 'upload_resume' %}" class="btn btn-primary">
-            Upload Resume
-        </a>
+        <a href="{% url 'resume:upload_resume' %}" class="btn btn-primary">Upload Resume</a>
 
     </div>
 
@@ -50,11 +48,11 @@
             <td>{{ resume.uploaded_at }}</td>
 
             <td>
-                <a href="{% url 'download_resume' resume.id %}" class="btn btn-sm btn-success">
+                <a href="{% url 'resume:download_resume' resume.id %}" class="btn btn-sm btn-success">
                     Download
                 </a>
 
-                <a href="{% url 'delete_resume' resume.id %}"
+                <a href="{% url 'resume:delete_resume' resume.id %}"
                     class="btn btn-danger btn-sm"
                     onclick="return confirm('Delete this resume?');">
                     Delete

@@ -1,0 +1,925 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+AI Resume Analysis Report
+{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-dark: #3730a3;
+        --secondary: #7c3aed;
+        --success: #16a34a;
+        --success-light: #dcfce7;
+        --danger: #dc2626;
+        --danger-light: #fee2e2;
+        --warning: #d97706;
+        --warning-light: #fef3c7;
+        --info: #0284c7;
+        --info-light: #e0f2fe;
+        --dark: #111827;
+        --text: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --background: #f4f7fb;
+        --white: #ffffff;
+    }
+
+    .analysis-page {
+        background:
+            radial-gradient(
+                circle at top right,
+                rgba(124, 58, 237, 0.10),
+                transparent 35%
+            ),
+            radial-gradient(
+                circle at top left,
+                rgba(79, 70, 229, 0.10),
+                transparent 35%
+            ),
+            var(--background);
+
+        min-height: 100vh;
+        padding: 40px 0 70px;
+    }
+
+    .analysis-container {
+        width: min(1180px, 92%);
+        margin: auto;
+    }
+
+    .report-header {
+        position: relative;
+        overflow: hidden;
+        padding: 38px;
+        border-radius: 24px;
+        color: white;
+        background:
+            linear-gradient(
+                135deg,
+                var(--primary-dark),
+                var(--primary),
+                var(--secondary)
+            );
+        box-shadow: 0 24px 50px rgba(55, 48, 163, 0.22);
+        margin-bottom: 28px;
+    }
+
+    .report-header::before,
+    .report-header::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.10);
+    }
+
+    .report-header::before {
+        width: 210px;
+        height: 210px;
+        top: -90px;
+        right: -60px;
+    }
+
+    .report-header::after {
+        width: 130px;
+        height: 130px;
+        bottom: -65px;
+        right: 170px;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        align-items: center;
+    }
+
+    .header-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .report-header h1 {
+        margin: 0 0 10px;
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 800;
+    }
+
+    .report-header p {
+        margin: 0;
+        max-width: 680px;
+        color: rgba(255, 255, 255, 0.86);
+        line-height: 1.7;
+    }
+
+    .resume-meta {
+        margin-top: 22px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .meta-item {
+        padding: 9px 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 14px;
+    }
+
+    .score-circle {
+        min-width: 165px;
+        width: 165px;
+        height: 165px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        border: 10px solid rgba(255, 255, 255, 0.20);
+        background: rgba(255, 255, 255, 0.14);
+        box-shadow:
+            inset 0 0 30px rgba(255, 255, 255, 0.10),
+            0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .score-circle strong {
+        display: block;
+        font-size: 42px;
+        line-height: 1;
+    }
+
+    .score-circle span {
+        display: block;
+        margin-top: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .summary-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 38px rgba(17, 24, 39, 0.10);
+    }
+
+    .summary-icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        font-size: 22px;
+        margin-bottom: 18px;
+    }
+
+    .icon-purple {
+        color: var(--primary);
+        background: #ede9fe;
+    }
+
+    .icon-green {
+        color: var(--success);
+        background: var(--success-light);
+    }
+
+    .icon-red {
+        color: var(--danger);
+        background: var(--danger-light);
+    }
+
+    .icon-blue {
+        color: var(--info);
+        background: var(--info-light);
+    }
+
+    .summary-card h3 {
+        margin: 0;
+        font-size: 29px;
+        color: var(--dark);
+        font-weight: 800;
+    }
+
+    .summary-card p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(310px, 0.8fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    .section-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 26px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+    }
+
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+        margin: 0;
+        color: var(--dark);
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .section-heading p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .count-badge {
+        min-width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #eef2ff;
+        color: var(--primary);
+        font-weight: 800;
+    }
+
+    .skill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .skill-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 13px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .skill-found {
+        color: #166534;
+        background: var(--success-light);
+        border: 1px solid #bbf7d0;
+    }
+
+    .skill-missing {
+        color: #991b1b;
+        background: var(--danger-light);
+        border: 1px solid #fecaca;
+    }
+
+    .progress-area {
+        margin-top: 22px;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .progress-track {
+        height: 14px;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #e5e7eb;
+    }
+
+    .progress-fill {
+        width: var(--score-width, 0%);
+        height: 100%;
+        border-radius: inherit;
+        transition: width 0.8s ease;
+    }
+
+    .progress-fill.excellent {
+        background: linear-gradient(90deg, #16a34a, #22c55e);
+    }
+
+    .progress-fill.good {
+        background: linear-gradient(90deg, #0284c7, #38bdf8);
+    }
+
+    .progress-fill.fair {
+        background: linear-gradient(90deg, #d97706, #f59e0b);
+    }
+
+    .progress-fill.poor {
+        background: linear-gradient(90deg, #dc2626, #ef4444);
+    }
+
+    .match-status {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 14px;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .status-excellent {
+        color: #166534;
+        background: var(--success-light);
+    }
+
+    .status-good {
+        color: #075985;
+        background: var(--info-light);
+    }
+
+    .status-fair {
+        color: #92400e;
+        background: var(--warning-light);
+    }
+
+    .status-poor {
+        color: #991b1b;
+        background: var(--danger-light);
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 14px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-table th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .comparison-table td {
+        color: var(--text);
+        font-size: 14px;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .found-pill {
+        color: #166534;
+        background: var(--success-light);
+    }
+
+    .missing-pill {
+        color: #991b1b;
+        background: var(--danger-light);
+    }
+
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 17px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .recommendation-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .recommendation-number {
+        min-width: 35px;
+        height: 35px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        color: white;
+        background:
+            linear-gradient(135deg, var(--primary), var(--secondary));
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .recommendation-item h3 {
+        margin: 0 0 6px;
+        font-size: 15px;
+        color: var(--dark);
+    }
+
+    .recommendation-item p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 14px;
+    }
+
+    .job-role-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin-bottom: 11px;
+    }
+
+    .job-role-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .job-role-item h4 {
+        margin: 0;
+        color: var(--dark);
+        font-size: 14px;
+    }
+
+    .job-role-score {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 24px;
+        border-radius: 14px;
+        background: #f9fafb;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 750;
+        transition: transform 0.2s ease;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .primary-btn {
+        color: white;
+        background:
+            linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    .secondary-btn {
+        color: var(--text);
+        background: white;
+        border: 1px solid var(--border);
+    }
+
+    @media (max-width: 992px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .analysis-page {
+            padding-top: 20px;
+        }
+
+        .report-header {
+            padding: 26px 22px;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .score-circle {
+            width: 135px;
+            min-width: 135px;
+            height: 135px;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-card {
+            padding: 20px;
+        }
+
+        .comparison-table {
+            min-width: 520px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="analysis-page">
+    <div class="analysis-container">
+
+        <section class="report-header">
+            <div class="header-content">
+
+                <div>
+                    <div class="header-label">
+                        ✨ AI-Powered Resume Report
+                    </div>
+
+                    <h1>Resume Analysis Report</h1>
+
+                    <p>
+                        Your resume has been analyzed against job-role
+                        requirements, technical skills and ATS keywords.
+                    </p>
+
+                    <div class="resume-meta">
+                        <div class="meta-item">
+                            📄
+                            {{ resume.original_filename|default:resume.resume_file.name }}
+                        </div>
+
+                        {% if selected_score %}
+                            <div class="meta-item">
+                                🎯 {{ selected_score.job_role.name }}
+                            </div>
+                        {% endif %}
+
+                        {% if analysis %}
+                            <div class="meta-item">
+                                🕒
+                                {{ analysis.analyzed_at|date:"d M Y, h:i A" }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="score-circle">
+                    <div>
+                        <strong>{{ score|floatformat:0 }}%</strong>
+                        <span>{{ score_label }}</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="summary-grid">
+
+            <article class="summary-card">
+                <div class="summary-icon icon-purple">📊</div>
+                <h3>{{ score|floatformat:0 }}%</h3>
+                <p>Overall ATS Score</p>
+            </article>
+
+            <article class="summary-card">
+                <div class="summary-icon icon-green">✓</div>
+                <h3>{{ extracted_skills|length }}</h3>
+                <p>Skills Detected</p>
+            </article>
+
+            <article class="summary-card">
+                <div class="summary-icon icon-red">!</div>
+                <h3>{{ missing_skills|length }}</h3>
+                <p>Missing Skills</p>
+            </article>
+
+            <article class="summary-card">
+                <div class="summary-icon icon-blue">💡</div>
+                <h3>{{ recommendations|length }}</h3>
+                <p>Recommendations</p>
+            </article>
+
+        </section>
+
+        <div class="content-grid">
+
+            <main>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>ATS Match Overview</h2>
+                            <p>
+                                Resume compatibility with the selected
+                                job role.
+                            </p>
+                        </div>
+
+                        <div class="count-badge">
+                            {{ score|floatformat:0 }}
+                        </div>
+                    </div>
+
+                    <div class="progress-area">
+                        <div class="progress-label">
+                            <span>{{ score_label }}</span>
+                            <span>{{ score|floatformat:0 }} / 100</span>
+                        </div>
+
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill {{ score_class }}"
+                                style="--score-width: {{ score|default:0|floatformat:0 }}%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="match-status status-{{ score_class }}">
+                        <strong>{{ score_label }}</strong><br>
+                        {{ verdict }}
+                    </div>
+                </section>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Extracted Skills</h2>
+                            <p>
+                                Technical skills detected from your
+                                uploaded resume.
+                            </p>
+                        </div>
+
+                        <div class="count-badge">
+                            {{ extracted_skills|length }}
+                        </div>
+                    </div>
+
+                    {% if extracted_skills %}
+                        <div class="skill-list">
+                            {% for item in extracted_skills %}
+                                <span class="skill-badge skill-found">
+                                    ✓ {{ item.skill.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            No matching technical skills were detected.
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Required Skill Comparison</h2>
+                            <p>
+                                Comparison between your resume and the
+                                selected job-role requirements.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if skill_comparison %}
+                        <div class="table-wrapper">
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Required Skill</th>
+                                        <th>Match Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for item in skill_comparison %}
+                                        <tr>
+                                            <td>
+                                                <strong>
+                                                    {{ item.skill.name }}
+                                                </strong>
+                                            </td>
+
+                                            <td>
+                                                {% if item.is_found %}
+                                                    <span class="status-pill found-pill">
+                                                        ✓ Found
+                                                    </span>
+                                                {% else %}
+                                                    <span class="status-pill missing-pill">
+                                                        ✕ Missing
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            Required skills are not configured for this role.
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Personalized Recommendations</h2>
+                            <p>
+                                Practical steps to improve your resume
+                                and job compatibility.
+                            </p>
+                        </div>
+
+                        <div class="count-badge">
+                            {{ recommendations|length }}
+                        </div>
+                    </div>
+
+                    {% if recommendations %}
+                        {% for recommendation in recommendations %}
+                            <article class="recommendation-item">
+                                <div class="recommendation-number">
+                                    {{ forloop.counter }}
+                                </div>
+
+                                <div>
+                                    <h3>{{ recommendation.title }}</h3>
+
+                                    <p>
+                                        {{ recommendation.description }}
+                                    </p>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            No recommendations are currently available.
+                        </div>
+                    {% endif %}
+                </section>
+
+            </main>
+
+            <aside>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Missing Skills</h2>
+                            <p>
+                                Skills that can increase your ATS score.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if missing_skills %}
+                        <div class="skill-list">
+                            {% for item in missing_skills %}
+                                <span class="skill-badge skill-missing">
+                                    ✕ {{ item.skill.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            Excellent! No required skills are missing.
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Job Role Scores</h2>
+                            <p>
+                                Resume match across available job roles.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if ats_scores %}
+                        {% for ats in ats_scores %}
+                            <div class="job-role-item">
+                                <h4>{{ ats.job_role.name }}</h4>
+
+                                <span class="job-role-score">
+                                    {{ ats.score|floatformat:0 }}%
+                                </span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            No job-role score is currently available.
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Overall Verdict</h2>
+                            <p>
+                                Final conclusion from the resume analysis.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="match-status status-{{ score_class }}">
+                        <strong>{{ score_label }}</strong>
+
+                        <p style="margin: 8px 0 0;">
+                            {{ verdict }}
+                        </p>
+
+                        {% if missing_skills %}
+                            <p style="margin: 10px 0 0;">
+                                Learning the missing skills can help
+                                increase your current score of
+                                <strong>{{ score|floatformat:0 }}%</strong>.
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="action-row">
+                        <a
+                            href="{% url 'resume:upload_resume' %}"
+                            class="action-btn primary-btn">
+                            Upload New Resume
+                        </a>
+
+                        <a
+                            href="{% url 'resume:resume_list' %}"
+                            class="action-btn secondary-btn">
+                            My Resumes
+                        </a>
+                    </div>
+                </section>
+
+            </aside>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
