@@ -27,6 +27,130 @@ AI Resume Analysis Report
         --background: #f4f7fb;
         --white: #ffffff;
     }
+.analysis-timeline {
+    position: relative;
+
+    display: grid;
+    gap: 20px;
+}
+
+.analysis-timeline::before {
+    content: "";
+
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    left: 8px;
+
+    width: 2px;
+
+    background: #e0e7ff;
+}
+
+.timeline-item {
+    position: relative;
+
+    display: flex;
+    gap: 16px;
+
+    padding-left: 34px;
+}
+
+.timeline-dot {
+    position: absolute;
+    top: 3px;
+    left: 0;
+
+    width: 18px;
+    height: 18px;
+
+    border: 4px solid #eef2ff;
+    border-radius: 50%;
+
+    background: var(--primary);
+}
+
+.timeline-item strong {
+    display: block;
+
+    color: var(--dark);
+    font-size: 14px;
+}
+
+.timeline-item p {
+    margin: 5px 0 0;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.resume-detail-card {
+    display: grid;
+    gap: 13px;
+}
+
+.resume-file-box {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 14px;
+
+    border-radius: 14px;
+
+    background: #f8fafc;
+}
+
+.resume-file-icon {
+    min-width: 45px;
+    height: 45px;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 22px;
+
+    border-radius: 12px;
+
+    background: #eef2ff;
+}
+
+.resume-file-box strong {
+    display: block;
+
+    color: var(--dark);
+    font-size: 14px;
+
+    word-break: break-word;
+}
+
+.resume-file-box span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.resume-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding-bottom: 11px;
+
+    color: var(--muted);
+    font-size: 13px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.resume-detail-row strong {
+    color: var(--text);
+    text-align: right;
+}
 
     .analysis-page {
         background:
@@ -139,34 +263,84 @@ AI Resume Analysis Report
         font-size: 14px;
     }
 
-    .score-circle {
-        min-width: 165px;
-        width: 165px;
-        height: 165px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        text-align: center;
-        border: 10px solid rgba(255, 255, 255, 0.20);
-        background: rgba(255, 255, 255, 0.14);
-        box-shadow:
-            inset 0 0 30px rgba(255, 255, 255, 0.10),
-            0 15px 35px rgba(0, 0, 0, 0.15);
+.score-circle {
+    --score: 0;
+
+    position: relative;
+
+    width: 175px;
+    min-width: 175px;
+    height: 175px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(55, 48, 163, 0.96) 0 59%,
+            transparent 60%
+        ),
+        conic-gradient(
+            #ffffff calc(var(--score) * 1%),
+            rgba(255, 255, 255, 0.20) 0
+        );
+
+    box-shadow:
+        inset 0 0 25px rgba(255, 255, 255, 0.10),
+        0 15px 35px rgba(0, 0, 0, 0.18);
+
+    animation: scoreCircleAnimation 0.8s ease-out;
+}
+
+.score-circle::after {
+    content: "";
+
+    position: absolute;
+    inset: 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+}
+
+.score-circle > div {
+    position: relative;
+    z-index: 2;
+
+    text-align: center;
+}
+
+.score-circle strong {
+    display: block;
+
+    font-size: 42px;
+    line-height: 1;
+}
+
+.score-circle span {
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: rgba(255, 255, 255, 0.85);
+}
+
+@keyframes scoreCircleAnimation {
+    from {
+        opacity: 0;
+        transform: scale(0.8) rotate(-20deg);
     }
 
-    .score-circle strong {
-        display: block;
-        font-size: 42px;
-        line-height: 1;
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
     }
-
-    .score-circle span {
-        display: block;
-        margin-top: 8px;
-        font-size: 13px;
-        font-weight: 700;
-        color: rgba(255, 255, 255, 0.85);
-    }
+}
 
     .summary-grid {
         display: grid;
@@ -546,6 +720,65 @@ AI Resume Analysis Report
         margin: 0 auto;
     }
 
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.metric-card {
+    padding: 17px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: #fbfcff;
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 10px;
+
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.metric-header strong {
+    color: var(--primary);
+}
+
+.metric-description {
+    margin: 0;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@media (max-width: 800px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.job-score-card {
+    display: block;
+}
+
+.job-score-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 10px;
+}
     @media (max-width: 992px) {
         .summary-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -633,7 +866,7 @@ AI Resume Analysis Report
                     </div>
                 </div>
 
-                <div class="score-circle">
+                <div class="score-circle" style="--score: {{ score|default:0|floatformat:0 }};">
                     <div>
                         <strong>{{ score|floatformat:0 }}%</strong>
                         <span>{{ score_label }}</span>
@@ -664,9 +897,12 @@ AI Resume Analysis Report
             </article>
 
             <article class="summary-card">
-                <div class="summary-icon icon-blue">💡</div>
-                <h3>{{ recommendations|length }}</h3>
-                <p>Recommendations</p>
+                <div class="summary-icon icon-blue">🎯</div>
+                <h3>
+                    {{ skill_match_percent|floatformat:0 }}%
+                </h3>
+                <p>Required Skills Matched</p>
+
             </article>
 
         </section>
@@ -680,7 +916,65 @@ AI Resume Analysis Report
                   </p>
                 </div>
             </div>
+<div class="metrics-grid">
 
+    <div class="metric-card">
+        <div class="metric-header">
+            <span>Overall ATS Compatibility</span>
+
+            <strong>
+                {{ score|floatformat:0 }}%
+            </strong>
+        </div>
+
+        <div class="progress-track">
+            <div
+                class="progress-fill {{ score_class }}"
+                style="
+                    --score-width:
+                    {{ score|default:0|floatformat:0 }}%;
+                "
+            ></div>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-header">
+            <span>Required Skills Matched</span>
+
+            <strong>
+                {{ found_required_count }}
+                /
+                {{ required_count }}
+            </strong>
+        </div>
+
+        <div class="progress-track">
+            <div
+                class="progress-fill good"
+                style="
+                    --score-width:
+                    {{ skill_match_percent|default:0|floatformat:0 }}%;
+                "
+            ></div>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-header">
+            <span>Detected Technical Skills</span>
+
+            <strong>
+                {{ extracted_skills|length }}
+            </strong>
+        </div>
+
+        <p class="metric-description">
+            Skills successfully identified from the uploaded resume.
+        </p>
+    </div>
+
+</div>
             <div class="chart-container">
                 <canvas id="skillsChart"></canvas>
             </div>
@@ -763,6 +1057,9 @@ AI Resume Analysis Report
                                 Comparison between your resume and the
                                 selected job-role requirements.
                             </p>
+                        </div>
+                        <div class="count-badge">
+                            {{ found_required_count }}/{{ required_count }}
                         </div>
                     </div>
 
@@ -887,12 +1184,26 @@ AI Resume Analysis Report
 
                     {% if ats_scores %}
                         {% for ats in ats_scores %}
-                            <div class="job-role-item">
-                                <h4>{{ ats.job_role.name }}</h4>
+                            <div class="job-role-item job-score-card">
 
-                                <span class="job-role-score">
-                                    {{ ats.score|floatformat:0 }}%
-                                </span>
+                                <div class="job-score-heading">
+                                    <h4>{{ ats.job_role.name }}</h4>
+
+                                    <span class="job-role-score">
+                                        {{ ats.score|floatformat:0 }}%
+                                    </span>
+                                </div>
+
+                                <div class="progress-track">
+                                    <div
+                                        class="progress-fill good"
+                                        style="
+                                            --score-width:
+                                            {{ ats.score|default:0|floatformat:0 }}%;
+                                        "
+                                    ></div>
+                                </div>
+
                             </div>
                         {% endfor %}
                     {% else %}
@@ -900,6 +1211,65 @@ AI Resume Analysis Report
                             No job-role score is currently available.
                         </div>
                     {% endif %}
+                </section>
+
+                <section class="section-card">
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Analysis Timeline</h2>
+
+                            <p>
+                                Your resume processing journey.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-timeline">
+
+                        <div class="timeline-item">
+                            <span class="timeline-dot"></span>
+
+                            <div>
+                                <strong>Resume Uploaded</strong>
+
+                                <p>
+                                    {{ resume.uploaded_at|date:"d M Y, h:i A" }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="timeline-dot"></span>
+
+                            <div>
+                                <strong>Skills Extracted</strong>
+
+                                <p>
+                                    {{ extracted_skills|length }}
+                                    technical skills detected
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="timeline-dot"></span>
+
+                            <div>
+                                <strong>ATS Score Generated</strong>
+
+                                <p>
+                                    {% if analysis %}
+                                        {{ analysis.analyzed_at|date:"d M Y, h:i A" }}
+                                    {% else %}
+                                        Analysis completed
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </section>
 
                 <section class="section-card">
@@ -943,6 +1313,87 @@ AI Resume Analysis Report
                     </div>
                 </section>
 
+                <section class="section-card">
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Resume Details</h2>
+
+                            <p>
+                                Uploaded file and analysis information.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="resume-detail-card">
+
+                        <div class="resume-file-box">
+                            <span class="resume-file-icon">
+                                📄
+                            </span>
+
+                            <div>
+                                <strong>
+                                    {{ resume.original_filename|default:resume.resume_file.name }}
+                                </strong>
+
+                                <span>
+                                    Uploaded resume
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="resume-detail-row">
+                            <span>Status</span>
+
+                            <strong>
+                                {{ resume.get_status_display|default:resume.status|title }}
+                            </strong>
+                        </div>
+
+                        <div class="resume-detail-row">
+                            <span>Uploaded</span>
+
+                            <strong>
+                                {{ resume.uploaded_at|date:"d M Y" }}
+                            </strong>
+                        </div>
+
+                        {% if resume.file_size %}
+                            <div class="resume-detail-row">
+                                <span>File Size</span>
+
+                                <strong>
+                                    {{ resume.file_size|filesizeformat }}
+                                </strong>
+                            </div>
+                        {% endif %}
+
+                        {% if resume.file_type %}
+                            <div class="resume-detail-row">
+                                <span>File Type</span>
+
+                                <strong>
+                                    {{ resume.file_type|upper }}
+                                </strong>
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="action-row">
+                        <a
+                            href="{{ resume.resume_file.url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="action-btn secondary-btn"
+                        >
+                            View Resume
+                        </a>
+                    </div>
+
+                </section>
+
             </aside>
 
         </div>
@@ -960,8 +1411,8 @@ AI Resume Analysis Report
             return;
         }
 
-        const detectedSkills = Number(
-            "{{ extracted_skills|length|default:0 }}"
+        const matchedRequiredSkills = Number(
+            "{{ found_required_count|default:0 }}"
         );
 
         const missingSkills = Number(
@@ -973,14 +1424,14 @@ AI Resume Analysis Report
 
             data: {
                 labels: [
-                    "Detected Skills",
-                    "Missing Skills"
+                    "Matched Required Skills",
+                    "Missing Required Skills"
                 ],
 
                 datasets: [
                     {
                         data: [
-                            detectedSkills,
+                            matchedRequiredSkills,
                             missingSkills
                         ],
 

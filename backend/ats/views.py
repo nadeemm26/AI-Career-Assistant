@@ -6,12 +6,57 @@ from resume.models import Resume
 from .models import ATSScore
 
 
+def get_score_details(score):
+    """
+    Return the label, CSS class and verdict according to the ATS score.
+    """
+
+    if score >= 80:
+        return {
+            "label": "Excellent Match",
+            "css_class": "excellent",
+            "verdict": (
+                "Your resume strongly matches the selected job role. "
+                "You have most of the required technical skills."
+            ),
+        }
+
+    if score >= 60:
+        return {
+            "label": "Good Match",
+            "css_class": "good",
+            "verdict": (
+                "Your resume has a good foundation, but adding the missing "
+                "skills can significantly improve your job match."
+            ),
+        }
+
+    if score >= 40:
+        return {
+            "label": "Fair Match",
+            "css_class": "fair",
+            "verdict": (
+                "Your resume partially matches the selected role. Focus on "
+                "the missing technical skills and relevant project experience."
+            ),
+        }
+
+    return {
+        "label": "Needs Improvement",
+        "css_class": "poor",
+        "verdict": (
+            "Your resume currently has a low match for this job role. "
+            "Build relevant skills and improve role-specific keywords."
+        ),
+    }
+
+
 @login_required
 def analysis_result(request, resume_id):
     resume = get_object_or_404(
         Resume,
         id=resume_id,
-        user=request.user
+        user=request.user,
     )
 
     ats_scores = (
@@ -20,35 +65,49 @@ def analysis_result(request, resume_id):
         .select_related("job_role")
         .prefetch_related(
             "missing_skills__skill",
-            "recommendations"
+            "recommendations",
         )
         .order_by("-score")
     )
 
     selected_score = ats_scores.first()
 
-    analysis = getattr(resume, "analysis", None)
-
-    extracted_skills = []
+    analysis = getattr(
+        resume,
+        "analysis",
+        None,
+    )
 
     if analysis:
-        extracted_skills = (
+        extracted_skills = list(
             analysis.extracted_skills
-            .select_related("skill", "skill__category")
+            .select_related(
+                "skill",
+                "skill__category",
+            )
             .order_by("skill__name")
         )
+    else:
+        extracted_skills = []
 
     missing_skills = []
     recommendations = []
     required_skills = []
 
     if selected_score:
-        missing_skills = selected_score.missing_skills.all()
-        recommendations = selected_score.recommendations.all().order_by(
-            "priority"
+        missing_skills = list(
+            selected_score.missing_skills
+            .select_related("skill")
+            .all()
         )
 
-        required_skills = (
+        recommendations = list(
+            selected_score.recommendations
+            .all()
+            .order_by("priority")
+        )
+
+        required_skills = list(
             selected_score.job_role.required_skills
             .select_related("skill")
             .order_by("skill__name")
@@ -59,83 +118,84 @@ def analysis_result(request, resume_id):
         for item in extracted_skills
     }
 
-    skill_comparison = []
-
-    for required_skill in required_skills:
-        skill_comparison.append({
+    skill_comparison = [
+        {
             "skill": required_skill.skill,
-            "is_found": required_skill.skill_id in extracted_skill_ids
-        })
+            "is_found": (
+                required_skill.skill_id
+                in extracted_skill_ids
+            ),
+        }
+        for required_skill in required_skills
+    ]
 
-    score = float(selected_score.score) if selected_score else 0
+    required_count = len(required_skills)
 
-    if score >= 80:
-        score_label = "Excellent Match"
-        score_class = "excellent"
-        verdict = (
-            "Your resume strongly matches the selected job role. "
-            "You have most of the required technical skills."
-        )
-    elif score >= 60:
-        score_label = "Good Match"
-        score_class = "good"
-        verdict = (
-            "Your resume has a good foundation, but adding the missing "
-            "skills can significantly improve your job match."
-        )
-    elif score >= 40:
-        score_label = "Fair Match"
-        score_class = "fair"
-        verdict = (
-            "Your resume partially matches the selected role. Focus on "
-            "the missing technical skills and relevant project experience."
-        )
+    found_required_count = sum(
+        1
+        for item in skill_comparison
+        if item["is_found"]
+    )
+
+    if required_count:
+        skill_match_percent = (
+            found_required_count
+            / required_count
+        ) * 100
     else:
-        score_label = "Needs Improvement"
-        score_class = "poor"
-        verdict = (
-            "Your resume currently has a low match for this job role. "
-            "Build relevant skills and improve role-specific keywords."
-        )
+        skill_match_percent = 0
+
+    score = (
+        float(selected_score.score)
+        if selected_score
+        else 0
+    )
+
+    score_details = get_score_details(score)
 
     context = {
         "resume": resume,
         "analysis": analysis,
         "ats_scores": ats_scores,
         "selected_score": selected_score,
+
         "score": score,
-        "score_label": score_label,
-        "score_class": score_class,
-        "verdict": verdict,
+        "score_label": score_details["label"],
+        "score_class": score_details["css_class"],
+        "verdict": score_details["verdict"],
+
         "extracted_skills": extracted_skills,
         "missing_skills": missing_skills,
         "recommendations": recommendations,
         "skill_comparison": skill_comparison,
+
+        "required_count": required_count,
+        "found_required_count": found_required_count,
+        "skill_match_percent": skill_match_percent,
     }
 
     return render(
         request,
         "ats/analysis_result.html",
-        context
+        context,
     )
+
 
 @login_required
 def analysis_list(request):
-
-    resumes = Resume.objects.filter(
-        user=request.user
-    ).select_related(
-        "analysis"
-    ).order_by(
-        "-uploaded_at"
+    resumes = (
+        Resume.objects
+        .filter(user=request.user)
+        .select_related("analysis")
+        .order_by("-uploaded_at")
     )
 
     context = {
-        "resumes": resumes
+        "resumes": resumes,
     }
 
     return render(
         request,
         "ats/analysis_list.html",
-        context
+        context,
     )
