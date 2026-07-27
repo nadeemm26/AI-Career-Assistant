@@ -1,0 +1,1273 @@
+{% extends "base.html" %}
+
+{% block title %}
+Upload Resume | AI Career Assistant
+{% endblock %}
+
+{% block content %}
+
+<div class="upload-page">
+
+    <div class="page-header">
+
+        <div>
+
+            <span class="page-label">
+                Resume Management
+            </span>
+
+            <h1 class="page-title">
+                Upload Your Resume
+            </h1>
+
+            <p class="page-description">
+                Upload your latest resume and receive an
+                AI-powered ATS analysis with skill matching
+                and improvement recommendations.
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'resume:resume_list' %}"
+            class="btn resume-list-button"
+        >
+            <i class="bi bi-file-earmark-text me-2"></i>
+            My Resumes
+        </a>
+
+    </div>
+
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div
+                class="alert
+                {% if message.tags == 'success' %}
+                    alert-success
+                {% else %}
+                    alert-danger
+                {% endif %}
+                alert-dismissible fade show"
+                role="alert"
+            >
+
+                <i
+                    class="
+                    {% if message.tags == 'success' %}
+                        bi bi-check-circle-fill
+                    {% else %}
+                        bi bi-exclamation-circle-fill
+                    {% endif %}
+                    me-2
+                    "
+                ></i>
+
+                {{ message }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                ></button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <div class="row g-4">
+
+        <div class="col-xl-8">
+
+            <div class="upload-card">
+
+                <div class="upload-card-header">
+
+                    <div class="header-icon">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                    </div>
+
+                    <div>
+                        <h2>Upload Resume File</h2>
+                        <p>
+                            Select a PDF or DOCX resume for
+                            ATS analysis.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                    id="resumeUploadForm"
+                    novalidate
+                >
+
+                    {% csrf_token %}
+
+
+                    {% if form.non_field_errors %}
+
+                        <div class="alert alert-danger">
+
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div
+                        class="drop-zone"
+                        id="dropZone"
+                    >
+
+                        {{ form.resume_file }}
+
+                        <div
+                            class="drop-zone-content"
+                            id="dropZoneContent"
+                        >
+
+                            <div class="upload-icon-circle">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                            </div>
+
+                            <h3>
+                                Drag and drop your resume here
+                            </h3>
+
+                            <p>
+                                or click to browse your files
+                            </p>
+
+                            <span class="browse-button">
+                                <i class="bi bi-folder2-open me-2"></i>
+                                Choose Resume
+                            </span>
+
+                            <div class="file-rules">
+                                PDF or DOCX · Maximum 5 MB
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="selected-file"
+                            id="selectedFile"
+                        >
+
+                            <div
+                                class="selected-file-icon"
+                                id="selectedFileIcon"
+                            >
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </div>
+
+                            <div class="selected-file-info">
+
+                                <h4 id="selectedFileName">
+                                    Resume file
+                                </h4>
+
+                                <p id="selectedFileSize">
+                                    File size
+                                </p>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="remove-file-button"
+                                id="removeFileButton"
+                                aria-label="Remove selected file"
+                            >
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    {% for error in form.resume_file.errors %}
+
+                        <div class="field-error">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+
+                    <div
+                        class="client-error"
+                        id="clientError"
+                    ></div>
+
+
+                    <div
+                        class="upload-progress-wrapper"
+                        id="uploadProgressWrapper"
+                    >
+
+                        <div class="progress-header">
+
+                            <span>
+                                Analyzing your resume...
+                            </span>
+
+                            <span id="progressPercentage">
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="progress">
+                            <div
+                                class="progress-bar progress-bar-striped
+                                progress-bar-animated"
+                                id="uploadProgressBar"
+                                role="progressbar"
+                                style="width: 0%"
+                            ></div>
+                        </div>
+
+                        <p class="progress-message">
+                            Please wait while the AI processes
+                            your resume.
+                        </p>
+
+                    </div>
+
+
+                    <div class="upload-actions">
+
+                        <a
+                            href="{% url 'dashboard' %}"
+                            class="btn cancel-button"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn analyze-button"
+                            id="analyzeButton"
+                            disabled
+                        >
+                            <i class="bi bi-stars me-2"></i>
+                            Upload & Analyze Resume
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-4">
+
+            <div class="info-card">
+
+                <div class="info-card-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+
+                <h3>
+                    Before You Upload
+                </h3>
+
+                <div class="info-list">
+
+                    <div class="info-item">
+
+                        <span>
+                            <i class="bi bi-check-lg"></i>
+                        </span>
+
+                        <div>
+                            <h4>Supported formats</h4>
+                            <p>PDF and DOCX files only</p>
+                        </div>
+
+                    </div>
+
+                    <div class="info-item">
+
+                        <span>
+                            <i class="bi bi-check-lg"></i>
+                        </span>
+
+                        <div>
+                            <h4>Maximum file size</h4>
+                            <p>Your file must be under 5 MB</p>
+                        </div>
+
+                    </div>
+
+                    <div class="info-item">
+
+                        <span>
+                            <i class="bi bi-check-lg"></i>
+                        </span>
+
+                        <div>
+                            <h4>Use readable content</h4>
+                            <p>
+                                Avoid scanned images and
+                                complex graphical layouts
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="info-item">
+
+                        <span>
+                            <i class="bi bi-check-lg"></i>
+                        </span>
+
+                        <div>
+                            <h4>Keep it updated</h4>
+                            <p>
+                                Upload your latest skills,
+                                education and experience
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="analysis-card">
+
+                <div class="analysis-card-header">
+
+                    <i class="bi bi-stars"></i>
+
+                    <h3>
+                        What will be analyzed?
+                    </h3>
+
+                </div>
+
+                <div class="analysis-tags">
+
+                    <span>
+                        <i class="bi bi-check2-circle"></i>
+                        Skills
+                    </span>
+
+                    <span>
+                        <i class="bi bi-check2-circle"></i>
+                        Keywords
+                    </span>
+
+                    <span>
+                        <i class="bi bi-check2-circle"></i>
+                        Education
+                    </span>
+
+                    <span>
+                        <i class="bi bi-check2-circle"></i>
+                        Experience
+                    </span>
+
+                    <span>
+                        <i class="bi bi-check2-circle"></i>
+                        Summary
+                    </span>
+
+                    <span>
+                        <i class="bi bi-check2-circle"></i>
+                        Job Match
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .upload-page {
+        padding: 8px 4px 40px;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .page-label {
+        display: inline-block;
+        margin-bottom: 7px;
+        color: #2563eb;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+    }
+
+    .page-title {
+        margin: 0 0 9px;
+        color: #0f172a;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .page-description {
+        max-width: 680px;
+        margin: 0;
+        color: #64748b;
+        font-size: 0.96rem;
+        line-height: 1.7;
+    }
+
+    .resume-list-button {
+        flex-shrink: 0;
+        padding: 11px 18px;
+        border: 1px solid #dbe4f0;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #334155;
+        font-weight: 700;
+    }
+
+    .resume-list-button:hover {
+        border-color: #2563eb;
+        color: #2563eb;
+        background: #eff6ff;
+    }
+
+    .upload-card,
+    .info-card,
+    .analysis-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        background: #ffffff;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+    }
+
+    .upload-card {
+        padding: 30px;
+    }
+
+    .upload-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 27px;
+    }
+
+    .header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        flex-shrink: 0;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #dbeafe, #ede9fe);
+        color: #2563eb;
+        font-size: 1.45rem;
+    }
+
+    .upload-card-header h2 {
+        margin: 0 0 5px;
+        color: #0f172a;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .upload-card-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.88rem;
+    }
+
+    .drop-zone {
+        position: relative;
+        min-height: 330px;
+        overflow: hidden;
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition:
+            border-color 0.2s ease,
+            background 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+        border-color: #2563eb;
+        background: #eff6ff;
+        transform: translateY(-2px);
+    }
+
+    .resume-file-input {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .drop-zone-content {
+        display: flex;
+        min-height: 326px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 35px;
+        text-align: center;
+    }
+
+    .upload-icon-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 78px;
+        height: 78px;
+        margin-bottom: 20px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #ffffff;
+        font-size: 2rem;
+        box-shadow: 0 16px 30px rgba(37, 99, 235, 0.23);
+    }
+
+    .drop-zone-content h3 {
+        margin-bottom: 8px;
+        color: #0f172a;
+        font-size: 1.1rem;
+        font-weight: 800;
+    }
+
+    .drop-zone-content p {
+        margin-bottom: 19px;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .browse-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 17px;
+        border-radius: 11px;
+        background: #ffffff;
+        color: #2563eb;
+        font-size: 0.88rem;
+        font-weight: 750;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    }
+
+    .file-rules {
+        margin-top: 18px;
+        color: #94a3b8;
+        font-size: 0.78rem;
+    }
+
+    .selected-file {
+        display: none;
+        min-height: 326px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 35px;
+        text-align: center;
+    }
+
+    .selected-file.show {
+        display: flex;
+    }
+
+    .selected-file-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 82px;
+        height: 82px;
+        margin-bottom: 18px;
+        border-radius: 22px;
+        background: #dbeafe;
+        color: #2563eb;
+        font-size: 2.2rem;
+    }
+
+    .selected-file-icon.docx {
+        background: #ede9fe;
+        color: #7c3aed;
+    }
+
+    .selected-file-info h4 {
+        max-width: 430px;
+        margin: 0 0 7px;
+        overflow-wrap: anywhere;
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .selected-file-info p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .remove-file-button {
+        position: relative;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .remove-file-button:hover {
+        background: #fecaca;
+    }
+
+    .field-error,
+    .client-error {
+        margin-top: 10px;
+        color: #dc2626;
+        font-size: 0.83rem;
+        font-weight: 600;
+    }
+
+    .client-error {
+        display: none;
+    }
+
+    .upload-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .cancel-button {
+        padding: 12px 21px;
+        border: 1px solid #dbe4f0;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #475569;
+        font-weight: 700;
+    }
+
+    .analyze-button {
+        padding: 12px 23px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #ffffff;
+        font-weight: 750;
+        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.22);
+    }
+
+    .analyze-button:hover {
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .analyze-button:disabled {
+        cursor: not-allowed;
+        background: #cbd5e1;
+        box-shadow: none;
+    }
+
+    .upload-progress-wrapper {
+        display: none;
+        margin-top: 23px;
+        padding: 18px;
+        border-radius: 14px;
+        background: #eff6ff;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        color: #334155;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .progress {
+        height: 9px;
+        border-radius: 20px;
+        background: #dbeafe;
+    }
+
+    .progress-message {
+        margin: 10px 0 0;
+        color: #64748b;
+        font-size: 0.78rem;
+    }
+
+    .info-card,
+    .analysis-card {
+        padding: 25px;
+    }
+
+    .info-card {
+        margin-bottom: 22px;
+    }
+
+    .info-card-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        margin-bottom: 17px;
+        border-radius: 15px;
+        background: #dcfce7;
+        color: #16a34a;
+        font-size: 1.35rem;
+    }
+
+    .info-card h3,
+    .analysis-card h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 1.08rem;
+        font-weight: 800;
+    }
+
+    .info-list {
+        display: grid;
+        gap: 20px;
+        margin-top: 23px;
+    }
+
+    .info-item {
+        display: flex;
+        gap: 12px;
+    }
+
+    .info-item > span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 27px;
+        height: 27px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #dcfce7;
+        color: #16a34a;
+        font-size: 0.77rem;
+    }
+
+    .info-item h4 {
+        margin: 0 0 4px;
+        color: #334155;
+        font-size: 0.88rem;
+        font-weight: 750;
+    }
+
+    .info-item p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.78rem;
+        line-height: 1.55;
+    }
+
+    .analysis-card-header {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 18px;
+    }
+
+    .analysis-card-header i {
+        color: #7c3aed;
+        font-size: 1.2rem;
+    }
+
+    .analysis-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    .analysis-tags span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 11px;
+        border-radius: 9px;
+        background: #f5f3ff;
+        color: #6d28d9;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 13px;
+    }
+
+    @media (max-width: 767.98px) {
+
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 1.65rem;
+        }
+
+        .resume-list-button {
+            width: 100%;
+        }
+
+        .upload-card {
+            padding: 20px;
+        }
+
+        .upload-card-header {
+            align-items: flex-start;
+        }
+
+        .drop-zone,
+        .drop-zone-content,
+        .selected-file {
+            min-height: 290px;
+        }
+
+        .upload-actions {
+            flex-direction: column-reverse;
+        }
+
+        .upload-actions .btn {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const form =
+                document.getElementById(
+                    "resumeUploadForm"
+                );
+
+            const fileInput =
+                document.getElementById(
+                    "resumeFileInput"
+                );
+
+            const dropZone =
+                document.getElementById(
+                    "dropZone"
+                );
+
+            const dropZoneContent =
+                document.getElementById(
+                    "dropZoneContent"
+                );
+
+            const selectedFile =
+                document.getElementById(
+                    "selectedFile"
+                );
+
+            const selectedFileName =
+                document.getElementById(
+                    "selectedFileName"
+                );
+
+            const selectedFileSize =
+                document.getElementById(
+                    "selectedFileSize"
+                );
+
+            const selectedFileIcon =
+                document.getElementById(
+                    "selectedFileIcon"
+                );
+
+            const removeFileButton =
+                document.getElementById(
+                    "removeFileButton"
+                );
+
+            const analyzeButton =
+                document.getElementById(
+                    "analyzeButton"
+                );
+
+            const clientError =
+                document.getElementById(
+                    "clientError"
+                );
+
+            const progressWrapper =
+                document.getElementById(
+                    "uploadProgressWrapper"
+                );
+
+            const progressBar =
+                document.getElementById(
+                    "uploadProgressBar"
+                );
+
+            const progressPercentage =
+                document.getElementById(
+                    "progressPercentage"
+                );
+
+            const maxFileSize =
+                5 * 1024 * 1024;
+
+            const allowedExtensions = [
+                "pdf",
+                "docx"
+            ];
+
+
+            function formatFileSize(bytes) {
+
+                if (bytes < 1024) {
+                    return bytes + " Bytes";
+                }
+
+                if (bytes < 1024 * 1024) {
+
+                    return (
+                        bytes / 1024
+                    ).toFixed(1) + " KB";
+
+                }
+
+                return (
+                    bytes / (1024 * 1024)
+                ).toFixed(2) + " MB";
+
+            }
+
+
+            function showError(message) {
+
+                clientError.textContent = message;
+
+                clientError.style.display =
+                    "block";
+
+                analyzeButton.disabled = true;
+
+            }
+
+
+            function clearError() {
+
+                clientError.textContent = "";
+
+                clientError.style.display =
+                    "none";
+
+            }
+
+
+            function resetFile() {
+
+                fileInput.value = "";
+
+                selectedFile.classList.remove(
+                    "show"
+                );
+
+                dropZoneContent.style.display =
+                    "flex";
+
+                selectedFileIcon.classList.remove(
+                    "docx"
+                );
+
+                analyzeButton.disabled = true;
+
+                clearError();
+
+            }
+
+
+            function displaySelectedFile(file) {
+
+                clearError();
+
+                if (!file) {
+                    resetFile();
+                    return;
+                }
+
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+                if (
+                    !allowedExtensions.includes(
+                        extension
+                    )
+                ) {
+
+                    resetFile();
+
+                    showError(
+                        "Only PDF and DOCX files are allowed."
+                    );
+
+                    return;
+
+                }
+
+                if (file.size > maxFileSize) {
+
+                    resetFile();
+
+                    showError(
+                        "Maximum file size is 5 MB."
+                    );
+
+                    return;
+
+                }
+
+                selectedFileName.textContent =
+                    file.name;
+
+                selectedFileSize.textContent =
+                    formatFileSize(file.size);
+
+                if (extension === "docx") {
+
+                    selectedFileIcon.classList.add(
+                        "docx"
+                    );
+
+                    selectedFileIcon.innerHTML =
+                        '<i class="bi bi-file-earmark-word-fill"></i>';
+
+                } else {
+
+                    selectedFileIcon.classList.remove(
+                        "docx"
+                    );
+
+                    selectedFileIcon.innerHTML =
+                        '<i class="bi bi-file-earmark-pdf-fill"></i>';
+
+                }
+
+                dropZoneContent.style.display =
+                    "none";
+
+                selectedFile.classList.add(
+                    "show"
+                );
+
+                analyzeButton.disabled = false;
+
+            }
+
+
+            fileInput.addEventListener(
+                "change",
+                function () {
+
+                    displaySelectedFile(
+                        fileInput.files[0]
+                    );
+
+                }
+            );
+
+
+            [
+                "dragenter",
+                "dragover"
+            ].forEach(function (eventName) {
+
+                dropZone.addEventListener(
+                    eventName,
+                    function (event) {
+
+                        event.preventDefault();
+
+                        dropZone.classList.add(
+                            "drag-over"
+                        );
+
+                    }
+                );
+
+            });
+
+
+            [
+                "dragleave",
+                "drop"
+            ].forEach(function (eventName) {
+
+                dropZone.addEventListener(
+                    eventName,
+                    function (event) {
+
+                        event.preventDefault();
+
+                        dropZone.classList.remove(
+                            "drag-over"
+                        );
+
+                    }
+                );
+
+            });
+
+
+            dropZone.addEventListener(
+                "drop",
+                function (event) {
+
+                    const droppedFiles =
+                        event.dataTransfer.files;
+
+                    if (!droppedFiles.length) {
+                        return;
+                    }
+
+                    const dataTransfer =
+                        new DataTransfer();
+
+                    dataTransfer.items.add(
+                        droppedFiles[0]
+                    );
+
+                    fileInput.files =
+                        dataTransfer.files;
+
+                    displaySelectedFile(
+                        droppedFiles[0]
+                    );
+
+                }
+            );
+
+
+            removeFileButton.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    resetFile();
+
+                }
+            );
+
+
+            form.addEventListener(
+                "submit",
+                function (event) {
+
+                    if (!fileInput.files.length) {
+
+                        event.preventDefault();
+
+                        showError(
+                            "Please select a resume file."
+                        );
+
+                        return;
+
+                    }
+
+                    analyzeButton.disabled = true;
+
+                    analyzeButton.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-2"></span>'
+                        + "Uploading & Analyzing...";
+
+                    progressWrapper.style.display =
+                        "block";
+
+                    let progress = 0;
+
+                    const interval =
+                        setInterval(function () {
+
+                            if (progress >= 90) {
+
+                                clearInterval(interval);
+
+                                return;
+
+                            }
+
+                            progress += 10;
+
+                            progressBar.style.width =
+                                progress + "%";
+
+                            progressPercentage.textContent =
+                                progress + "%";
+
+                        }, 350);
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
+{% endblock %}

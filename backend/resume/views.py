@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import FileResponse, Http404
 from pathlib import Path
-
+from django.views.decorators.http import require_POST
 
 from .models import Resume
 from .forms import ResumeUploadForm
@@ -65,13 +65,42 @@ def upload_resume(request):
                     resume_id=resume.id
                 )
 
-            except Exception as error:
-                resume.status = "failed"
-                resume.save(update_fields=["status", "updated_at"])
+            except ValueError as error:
+
+                error_message = str(error)
+
+                resume.resume_file.delete(save=False)
+                resume.delete()
 
                 messages.error(
                     request,
-                    f"Resume analysis failed: {error}"
+                    error_message
+                )
+
+                return render(
+                    request,
+                    "resume/upload_resume.html",
+                    {
+                        "form": ResumeUploadForm()
+                    }
+                )
+
+            except Exception as error:
+
+                print(f"ATS analysis error: {error}")
+
+                resume.status = "failed"
+                resume.save(
+                    update_fields=[
+                        "status",
+                        "updated_at"
+                        ]  
+                    )
+
+                messages.error(
+                    request,
+                        "Resume uploaded, but analysis could not be completed. "
+                        "Please try again."
                 )
 
     else:
@@ -89,10 +118,24 @@ def resume_list(request):
         user=request.user
     ).order_by("-uploaded_at")
 
+    context = {
+        "resumes": resumes,
+        "total_resumes": resumes.count(),
+        "completed_resumes": resumes.filter(
+            status="completed"
+        ).count(),
+        "processing_resumes": resumes.filter(
+            status="processing"
+        ).count(),
+        "failed_resumes": resumes.filter(
+            status="failed"
+        ).count(),
+    }
+
     return render(
         request,
         "resume/resume_list.html",
-        {"resumes": resumes}
+        context
     )
 
 @login_required
@@ -114,6 +157,7 @@ def download_resume(request, pk):
     )
 
 @login_required
+@require_POST
 def delete_resume(request, pk):
 
     try:
@@ -125,7 +169,10 @@ def delete_resume(request, pk):
     except Resume.DoesNotExist:
         raise Http404()
 
-    resume.resume_file.delete(save=False)
+    resume.resume_file.delete(
+        save=False
+    )
+
     resume.delete()
 
     messages.success(
@@ -133,5 +180,6 @@ def delete_resume(request, pk):
         "Resume deleted successfully."
     )
 
-    return redirect("resume:resume_list")
-
+    return redirect(
+        "resume:resume_list"
+    )

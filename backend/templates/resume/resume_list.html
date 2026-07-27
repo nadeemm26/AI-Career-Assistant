@@ -1,0 +1,1403 @@
+{% extends "base.html" %}
+
+{% block title %}
+My Resumes | AI Career Assistant
+{% endblock %}
+
+{% block content %}
+
+<div class="resume-page">
+
+    <!-- Page Header -->
+
+    <div class="page-header">
+
+        <div>
+
+            <span class="page-label">
+                Resume Management
+            </span>
+
+            <h1 class="page-title">
+                My Resumes
+            </h1>
+
+            <p class="page-description">
+                Manage your uploaded resumes, view ATS reports
+                and track analysis status.
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'resume:upload_resume' %}"
+            class="btn upload-resume-button"
+        >
+            <i class="bi bi-cloud-arrow-up-fill me-2"></i>
+            Upload Resume
+        </a>
+
+    </div>
+
+
+    <!-- Django Messages -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div
+                class="alert
+                {% if message.tags == 'success' %}
+                    alert-success
+                {% elif message.tags == 'warning' %}
+                    alert-warning
+                {% else %}
+                    alert-danger
+                {% endif %}
+                alert-dismissible fade show"
+                role="alert"
+            >
+
+                <i
+                    class="
+                    {% if message.tags == 'success' %}
+                        bi bi-check-circle-fill
+                    {% elif message.tags == 'warning' %}
+                        bi bi-exclamation-triangle-fill
+                    {% else %}
+                        bi bi-exclamation-circle-fill
+                    {% endif %}
+                    me-2
+                    "
+                ></i>
+
+                {{ message }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                ></button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- Statistics -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon total-icon">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+
+                <div>
+
+                    <p class="stat-label">
+                        Total Resumes
+                    </p>
+
+                    <h3 class="stat-value">
+                        {{ total_resumes }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon completed-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div>
+
+                    <p class="stat-label">
+                        Completed
+                    </p>
+
+                    <h3 class="stat-value">
+                        {{ completed_resumes }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon processing-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+
+                    <p class="stat-label">
+                        Processing
+                    </p>
+
+                    <h3 class="stat-value">
+                        {{ processing_resumes }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="stat-card">
+
+                <div class="stat-icon failed-icon">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+
+                <div>
+
+                    <p class="stat-label">
+                        Failed
+                    </p>
+
+                    <h3 class="stat-value">
+                        {{ failed_resumes }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if resumes %}
+
+        <!-- Search and Filter Header -->
+
+        <div class="resume-toolbar">
+
+            <div class="search-wrapper">
+
+                <i class="bi bi-search search-icon"></i>
+
+                <input
+                    type="search"
+                    id="resumeSearch"
+                    class="resume-search-input"
+                    placeholder="Search by resume filename..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+            <div class="toolbar-result">
+
+                Showing
+
+                <strong id="visibleResumeCount">
+                    {{ total_resumes }}
+                </strong>
+
+                resume{{ total_resumes|pluralize }}
+
+            </div>
+
+        </div>
+
+
+        <!-- Resume Cards -->
+
+        <div
+            class="resume-grid"
+            id="resumeGrid"
+        >
+
+            {% for resume in resumes %}
+
+                <div
+                    class="resume-card"
+                    data-resume-name="{{ resume.original_filename|lower }}"
+                >
+
+                    <div class="resume-card-top">
+
+                        <div
+                            class="
+                            resume-file-icon
+                            {% if resume.file_type == 'pdf' %}
+                                pdf-icon
+                            {% else %}
+                                docx-icon
+                            {% endif %}
+                            "
+                        >
+
+                            {% if resume.file_type == "pdf" %}
+
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+
+                            {% else %}
+
+                                <i class="bi bi-file-earmark-word-fill"></i>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="resume-main-info">
+
+                            <h3
+                                class="resume-name"
+                                title="{{ resume.original_filename }}"
+                            >
+                                {{ resume.original_filename }}
+                            </h3>
+
+                            <div class="resume-meta">
+
+                                <span>
+                                    <i class="bi bi-file-earmark"></i>
+                                    {{ resume.file_type|upper }}
+                                </span>
+
+                                <span>
+                                    <i class="bi bi-calendar3"></i>
+                                    {{ resume.uploaded_at|date:"d M Y" }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            {% if resume.status == "completed" %}
+
+                                <span class="status-badge completed-status">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Completed
+                                </span>
+
+                            {% elif resume.status == "processing" %}
+
+                                <span class="status-badge processing-status">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    Processing
+                                </span>
+
+                            {% elif resume.status == "failed" %}
+
+                                <span class="status-badge failed-status">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Failed
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge uploaded-status">
+                                    <i class="bi bi-cloud-check-fill"></i>
+                                    Uploaded
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="resume-details">
+
+                        <div class="detail-item">
+
+                            <span class="detail-label">
+                                File Size
+                            </span>
+
+                            <span
+                                class="detail-value"
+                                data-file-size="{{ resume.file_size }}"
+                            >
+                                {{ resume.file_size }} bytes
+                            </span>
+
+                        </div>
+
+
+                        <div class="detail-item">
+
+                            <span class="detail-label">
+                                Uploaded
+                            </span>
+
+                            <span class="detail-value">
+                                {{ resume.uploaded_at|timesince }} ago
+                            </span>
+
+                        </div>
+
+
+                        <div class="detail-item">
+
+                            <span class="detail-label">
+                                Status
+                            </span>
+
+                            <span class="detail-value text-capitalize">
+                                {{ resume.status }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="resume-actions">
+
+                        {% if resume.status == "completed" %}
+
+                            <a
+                                href="{% url 'ats:analysis_result' resume.id %}"
+                                class="btn view-analysis-button"
+                            >
+                                <i class="bi bi-bar-chart-fill me-2"></i>
+                                View ATS
+                            </a>
+
+                        {% elif resume.status == "processing" %}
+
+                            <button
+                                type="button"
+                                class="btn view-analysis-button"
+                                disabled
+                            >
+                                <span
+                                    class="spinner-border spinner-border-sm me-2"
+                                ></span>
+                                Processing
+                            </button>
+
+                        {% else %}
+
+                            <button
+                                type="button"
+                                class="btn view-analysis-button"
+                                disabled
+                            >
+                                <i class="bi bi-bar-chart-fill me-2"></i>
+                                ATS Unavailable
+                            </button>
+
+                        {% endif %}
+
+
+                        <a
+                            href="{% url 'resume:download_resume' resume.id %}"
+                            class="btn icon-action-button download-button"
+                            title="Download Resume"
+                        >
+                            <i class="bi bi-download"></i>
+                        </a>
+
+
+                        <button
+                            type="button"
+                            class="btn icon-action-button delete-button"
+                            title="Delete Resume"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteResumeModal"
+                            data-delete-url="{% url 'resume:delete_resume' resume.id %}"
+                            data-resume-name="{{ resume.original_filename }}"
+                        >
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- No Search Result -->
+
+        <div
+            class="no-search-result"
+            id="noSearchResult"
+        >
+
+            <div class="no-result-icon">
+                <i class="bi bi-search"></i>
+            </div>
+
+            <h3>No resume found</h3>
+
+            <p>
+                Try searching with a different filename.
+            </p>
+
+        </div>
+
+
+    {% else %}
+
+        <!-- Empty State -->
+
+        <div class="empty-state">
+
+            <div class="empty-state-icon">
+                <i class="bi bi-file-earmark-plus"></i>
+            </div>
+
+            <h2>
+                No resumes uploaded yet
+            </h2>
+
+            <p>
+                Upload your first resume to receive an ATS score,
+                skill analysis and personalized recommendations.
+            </p>
+
+            <a
+                href="{% url 'resume:upload_resume' %}"
+                class="btn upload-resume-button"
+            >
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i>
+                Upload Your First Resume
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- Delete Confirmation Modal -->
+
+<div
+    class="modal fade"
+    id="deleteResumeModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content delete-modal">
+
+            <div class="modal-body">
+
+                <div class="delete-modal-icon">
+                    <i class="bi bi-trash3-fill"></i>
+                </div>
+
+                <h3>
+                    Delete Resume?
+                </h3>
+
+                <p>
+                    Are you sure you want to delete
+                    <strong id="deleteResumeName"></strong>?
+                    This action cannot be undone.
+                </p>
+
+
+                <div class="delete-modal-actions">
+
+                    <button
+                        type="button"
+                        class="btn modal-cancel-button"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancel
+                    </button>
+
+                    <form
+                        method="POST"
+                        id="deleteResumeForm"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn modal-delete-button"
+                        >
+                            <i class="bi bi-trash3-fill me-2"></i>
+                            Delete Resume
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .resume-page {
+        padding: 8px 4px 40px;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .page-label {
+        display: inline-block;
+        margin-bottom: 7px;
+        color: #2563eb;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+    }
+
+    .page-title {
+        margin: 0 0 9px;
+        color: #0f172a;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .page-description {
+        max-width: 650px;
+        margin: 0;
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+
+    .upload-resume-button {
+        flex-shrink: 0;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+        color: #ffffff;
+        font-weight: 750;
+        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.22);
+    }
+
+    .upload-resume-button:hover {
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28);
+    }
+
+
+    /* Statistics */
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        height: 100%;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 49px;
+        height: 49px;
+        flex-shrink: 0;
+        border-radius: 15px;
+        font-size: 1.25rem;
+    }
+
+    .total-icon {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .completed-icon {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .processing-icon {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .failed-icon {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .stat-label {
+        margin: 0 0 3px;
+        color: #64748b;
+        font-size: 0.79rem;
+        font-weight: 650;
+    }
+
+    .stat-value {
+        margin: 0;
+        color: #0f172a;
+        font-size: 1.45rem;
+        font-weight: 800;
+    }
+
+
+    /* Toolbar */
+
+    .resume-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 21px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 17px;
+        background: #ffffff;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 470px;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        color: #94a3b8;
+        transform: translateY(-50%);
+    }
+
+    .resume-search-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 11px 15px 11px 44px;
+        border: 1px solid #dbe4f0;
+        border-radius: 12px;
+        outline: none;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.88rem;
+    }
+
+    .resume-search-input:focus {
+        border-color: #2563eb;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.09);
+    }
+
+    .toolbar-result {
+        flex-shrink: 0;
+        color: #64748b;
+        font-size: 0.84rem;
+    }
+
+    .toolbar-result strong {
+        color: #0f172a;
+    }
+
+
+    /* Resume Grid */
+
+    .resume-grid {
+        display: grid;
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(390px, 1fr)
+        );
+        gap: 19px;
+    }
+
+    .resume-card {
+        padding: 23px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+        transition:
+            transform 0.22s ease,
+            box-shadow 0.22s ease,
+            border-color 0.22s ease;
+    }
+
+    .resume-card:hover {
+        border-color: #c7d7fe;
+        transform: translateY(-4px);
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.09);
+    }
+
+    .resume-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .resume-file-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        flex-shrink: 0;
+        border-radius: 15px;
+        font-size: 1.55rem;
+    }
+
+    .pdf-icon {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .docx-icon {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .resume-main-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .resume-name {
+        margin: 2px 0 8px;
+        overflow: hidden;
+        color: #0f172a;
+        font-size: 0.97rem;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .resume-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 11px;
+    }
+
+    .resume-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #64748b;
+        font-size: 0.73rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 9px;
+        border-radius: 20px;
+        font-size: 0.68rem;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .completed-status {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .processing-status {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .processing-status i {
+        animation: spin 1.1s linear infinite;
+    }
+
+    .failed-status {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .uploaded-status {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    @keyframes spin {
+
+        to {
+            transform: rotate(360deg);
+        }
+
+    }
+
+
+    /* Resume Details */
+
+    .resume-details {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: 21px;
+        padding: 16px 0;
+        border-top: 1px solid #eef2f7;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .detail-item {
+        padding: 0 11px;
+        border-right: 1px solid #eef2f7;
+    }
+
+    .detail-item:first-child {
+        padding-left: 0;
+    }
+
+    .detail-item:last-child {
+        padding-right: 0;
+        border-right: none;
+    }
+
+    .detail-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #94a3b8;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .detail-value {
+        display: block;
+        color: #334155;
+        font-size: 0.77rem;
+        font-weight: 700;
+    }
+
+
+    /* Buttons */
+
+    .resume-actions {
+        display: flex;
+        gap: 9px;
+        margin-top: 18px;
+    }
+
+    .view-analysis-button {
+        flex: 1;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 11px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 0.79rem;
+        font-weight: 750;
+    }
+
+    .view-analysis-button:hover:not(:disabled) {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+    .view-analysis-button:disabled {
+        color: #94a3b8;
+        background: #f1f5f9;
+    }
+
+    .icon-action-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 43px;
+        height: 42px;
+        border-radius: 11px;
+    }
+
+    .download-button {
+        border: 1px solid #bbf7d0;
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .download-button:hover {
+        border-color: #16a34a;
+        background: #16a34a;
+        color: #ffffff;
+    }
+
+    .delete-button {
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .delete-button:hover {
+        border-color: #dc2626;
+        background: #dc2626;
+        color: #ffffff;
+    }
+
+
+    /* Empty State */
+
+    .empty-state,
+    .no-search-result {
+        padding: 65px 25px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 22px;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .empty-state-icon,
+    .no-result-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 78px;
+        height: 78px;
+        margin: 0 auto 21px;
+        border-radius: 23px;
+        background: linear-gradient(135deg, #dbeafe, #ede9fe);
+        color: #2563eb;
+        font-size: 2rem;
+    }
+
+    .empty-state h2,
+    .no-search-result h3 {
+        margin-bottom: 9px;
+        color: #0f172a;
+        font-weight: 800;
+    }
+
+    .empty-state h2 {
+        font-size: 1.35rem;
+    }
+
+    .empty-state p,
+    .no-search-result p {
+        max-width: 500px;
+        margin: 0 auto 24px;
+        color: #64748b;
+        font-size: 0.88rem;
+        line-height: 1.65;
+    }
+
+    .no-search-result {
+        display: none;
+    }
+
+
+    /* Delete Modal */
+
+    .delete-modal {
+        border: none;
+        border-radius: 22px;
+        box-shadow: 0 25px 70px rgba(15, 23, 42, 0.2);
+    }
+
+    .delete-modal .modal-body {
+        padding: 35px;
+        text-align: center;
+    }
+
+    .delete-modal-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 19px;
+        border-radius: 20px;
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 1.65rem;
+    }
+
+    .delete-modal h3 {
+        margin-bottom: 10px;
+        color: #0f172a;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .delete-modal p {
+        margin-bottom: 25px;
+        color: #64748b;
+        font-size: 0.88rem;
+        line-height: 1.65;
+    }
+
+    .delete-modal p strong {
+        color: #334155;
+        overflow-wrap: anywhere;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 11px;
+    }
+
+    .modal-cancel-button,
+    .modal-delete-button {
+        padding: 10px 18px;
+        border-radius: 11px;
+        font-size: 0.84rem;
+        font-weight: 750;
+    }
+
+    .modal-cancel-button {
+        border: 1px solid #dbe4f0;
+        background: #ffffff;
+        color: #475569;
+    }
+
+    .modal-delete-button {
+        border: none;
+        background: #dc2626;
+        color: #ffffff;
+    }
+
+    .modal-delete-button:hover {
+        background: #b91c1c;
+        color: #ffffff;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 13px;
+    }
+
+
+    /* Responsive */
+
+    @media (max-width: 767.98px) {
+
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 1.65rem;
+        }
+
+        .upload-resume-button {
+            width: 100%;
+        }
+
+        .resume-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .search-wrapper {
+            max-width: none;
+        }
+
+        .resume-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .resume-card-top {
+            flex-wrap: wrap;
+        }
+
+        .resume-card-top > div:last-child {
+            width: 100%;
+        }
+
+        .resume-details {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .detail-item,
+        .detail-item:first-child,
+        .detail-item:last-child {
+            padding: 0;
+            border-right: none;
+        }
+
+        .resume-actions {
+            flex-wrap: wrap;
+        }
+
+        .view-analysis-button {
+            flex-basis: 100%;
+        }
+
+        .icon-action-button {
+            flex: 1;
+        }
+
+        .delete-modal-actions {
+            flex-direction: column-reverse;
+        }
+
+        .delete-modal-actions form,
+        .delete-modal-actions .btn {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            /*
+            -----------------------------------
+            Format File Sizes
+            -----------------------------------
+            */
+
+            const fileSizeElements =
+                document.querySelectorAll(
+                    "[data-file-size]"
+                );
+
+            fileSizeElements.forEach(
+                function (element) {
+
+                    const bytes =
+                        Number(
+                            element.dataset.fileSize
+                        );
+
+                    if (
+                        !Number.isFinite(bytes)
+                        || bytes < 0
+                    ) {
+                        return;
+                    }
+
+                    let formattedSize;
+
+                    if (bytes < 1024) {
+
+                        formattedSize =
+                            bytes + " Bytes";
+
+                    } else if (
+                        bytes < 1024 * 1024
+                    ) {
+
+                        formattedSize =
+                            (
+                                bytes / 1024
+                            ).toFixed(1) + " KB";
+
+                    } else {
+
+                        formattedSize =
+                            (
+                                bytes /
+                                (1024 * 1024)
+                            ).toFixed(2) + " MB";
+
+                    }
+
+                    element.textContent =
+                        formattedSize;
+
+                }
+            );
+
+
+            /*
+            -----------------------------------
+            Live Search
+            -----------------------------------
+            */
+
+            const searchInput =
+                document.getElementById(
+                    "resumeSearch"
+                );
+
+            const resumeCards =
+                document.querySelectorAll(
+                    ".resume-card"
+                );
+
+            const visibleResumeCount =
+                document.getElementById(
+                    "visibleResumeCount"
+                );
+
+            const resumeGrid =
+                document.getElementById(
+                    "resumeGrid"
+                );
+
+            const noSearchResult =
+                document.getElementById(
+                    "noSearchResult"
+                );
+
+            if (searchInput) {
+
+                searchInput.addEventListener(
+                    "input",
+                    function () {
+
+                        const query =
+                            searchInput.value
+                                .trim()
+                                .toLowerCase();
+
+                        let visibleCount = 0;
+
+                        resumeCards.forEach(
+                            function (card) {
+
+                                const resumeName =
+                                    card.dataset
+                                        .resumeName;
+
+                                const isVisible =
+                                    resumeName.includes(
+                                        query
+                                    );
+
+                                card.style.display =
+                                    isVisible
+                                        ? "block"
+                                        : "none";
+
+                                if (isVisible) {
+                                    visibleCount++;
+                                }
+
+                            }
+                        );
+
+                        visibleResumeCount.textContent =
+                            visibleCount;
+
+                        if (visibleCount === 0) {
+
+                            resumeGrid.style.display =
+                                "none";
+
+                            noSearchResult.style.display =
+                                "block";
+
+                        } else {
+
+                            resumeGrid.style.display =
+                                "grid";
+
+                            noSearchResult.style.display =
+                                "none";
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /*
+            -----------------------------------
+            Delete Confirmation Modal
+            -----------------------------------
+            */
+
+            const deleteModal =
+                document.getElementById(
+                    "deleteResumeModal"
+                );
+
+            const deleteResumeForm =
+                document.getElementById(
+                    "deleteResumeForm"
+                );
+
+            const deleteResumeName =
+                document.getElementById(
+                    "deleteResumeName"
+                );
+
+            if (deleteModal) {
+
+                deleteModal.addEventListener(
+                    "show.bs.modal",
+                    function (event) {
+
+                        const button =
+                            event.relatedTarget;
+
+                        const deleteUrl =
+                            button.dataset.deleteUrl;
+
+                        const resumeName =
+                            button.dataset.resumeName;
+
+                        deleteResumeForm.action =
+                            deleteUrl;
+
+                        deleteResumeName.textContent =
+                            resumeName;
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+</script>
+
+{% endblock %}

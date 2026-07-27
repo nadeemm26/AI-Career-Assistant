@@ -1,6 +1,6 @@
 from django.db import transaction
-
 from jobs.models import JobRole, Skill
+from resume.validators import ResumeContentValidator
 
 from .models import (
     ResumeAnalysis,
@@ -14,7 +14,6 @@ from .parser import ResumeParser
 from .skill_extractor import SkillExtractor
 from .ats_calculator import ATSCalculator
 
-
 class ATSService:
 
     @staticmethod
@@ -26,6 +25,13 @@ class ATSService:
         text = ResumeParser.extract_text(
             resume.resume_file.path
         )
+
+        is_valid_resume, validation_result = (
+            ResumeContentValidator.validate(text)
+        )
+
+        if not is_valid_resume:
+            raise ValueError(validation_result)
 
         found_skill_names = SkillExtractor.extract(text)
 
