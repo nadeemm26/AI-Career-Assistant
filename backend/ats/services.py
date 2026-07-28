@@ -1,6 +1,8 @@
 from django.db import transaction
+
 from jobs.models import JobRole, Skill
 from resume.validators import ResumeContentValidator
+from courses.models import Course, CourseRecommendation
 
 from .models import (
     ResumeAnalysis,
@@ -101,9 +103,11 @@ class ATSService:
             # ---------- Missing Skills ----------
 
             found_lower = {
-                s.lower()
-                for s in found_skill_names
+                skill_name.lower()
+                for skill_name in found_skill_names
             }
+
+            missing_skill_objects = []
 
             for skill in required:
 
@@ -111,9 +115,40 @@ class ATSService:
 
                     MissingSkill.objects.create(
                         ats_score=ats,
-                        skill=skill
+                        skill=skill,
                     )
 
+                    missing_skill_objects.append(skill)
+            # ---------- Course Recommendations ----------
+
+            for priority, missing_skill in enumerate(
+                missing_skill_objects,
+                start=1,
+            ):
+                matching_courses = (
+                    Course.objects
+                    .filter(
+                        skill=missing_skill,
+                        is_active=True,
+                    )
+                    .order_by(
+                        "-is_free",
+                        "-rating",
+                        "title",
+                    )[:3]
+                )
+
+                for course in matching_courses:
+                    CourseRecommendation.objects.create(
+                        ats_score=ats,
+                        course=course,
+                        reason=(
+                            f"{missing_skill.name} is a missing skill "
+                            f"for the {job.title} role. This course can "
+                            f"help you improve this skill."
+                        ),
+                        priority=priority,
+                    )
             # ---------- Recommendation ----------
 
             if score < 60:

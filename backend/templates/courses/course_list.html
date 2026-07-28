@@ -1,0 +1,1172 @@
+{% extends "base.html" %}
+
+{% block title %}
+Courses | AI Career Assistant
+{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --course-primary: #4f46e5;
+        --course-secondary: #7c3aed;
+        --course-dark: #111827;
+        --course-text: #374151;
+        --course-muted: #6b7280;
+        --course-border: #e5e7eb;
+        --course-bg: #f5f7fb;
+        --course-white: #ffffff;
+        --course-success: #16a34a;
+        --course-success-light: #dcfce7;
+        --course-warning: #d97706;
+        --course-warning-light: #fef3c7;
+        --course-danger: #dc2626;
+        --course-danger-light: #fee2e2;
+        --course-info: #0284c7;
+        --course-info-light: #e0f2fe;
+    }
+
+    .courses-page {
+        min-height: 100vh;
+        padding: 38px 0 70px;
+
+        background:
+            radial-gradient(
+                circle at top right,
+                rgba(124, 58, 237, 0.10),
+                transparent 32%
+            ),
+            radial-gradient(
+                circle at top left,
+                rgba(79, 70, 229, 0.09),
+                transparent 30%
+            ),
+            var(--course-bg);
+    }
+
+    .courses-container {
+        width: min(1180px, 92%);
+        margin: auto;
+    }
+
+    .courses-hero {
+        position: relative;
+        overflow: hidden;
+
+        padding: 36px;
+        margin-bottom: 25px;
+
+        color: white;
+
+        border-radius: 24px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #3730a3,
+                var(--course-primary),
+                var(--course-secondary)
+            );
+
+        box-shadow:
+            0 22px 48px rgba(55, 48, 163, 0.20);
+    }
+
+    .courses-hero::before,
+    .courses-hero::after {
+        content: "";
+
+        position: absolute;
+
+        border-radius: 50%;
+
+        background: rgba(255, 255, 255, 0.10);
+    }
+
+    .courses-hero::before {
+        width: 210px;
+        height: 210px;
+
+        top: -100px;
+        right: -50px;
+    }
+
+    .courses-hero::after {
+        width: 130px;
+        height: 130px;
+
+        right: 180px;
+        bottom: -80px;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        padding: 7px 13px;
+        margin-bottom: 14px;
+
+        font-size: 13px;
+        font-weight: 750;
+
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 30px;
+
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .courses-hero h1 {
+        margin: 0 0 9px;
+
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 850;
+    }
+
+    .courses-hero p {
+        max-width: 680px;
+
+        margin: 0;
+
+        color: rgba(255, 255, 255, 0.86);
+
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .course-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        padding: 19px;
+
+        border: 1px solid var(--course-border);
+        border-radius: 17px;
+
+        background: var(--course-white);
+
+        box-shadow:
+            0 9px 25px rgba(17, 24, 39, 0.05);
+    }
+
+    .stat-card strong {
+        display: block;
+
+        color: var(--course-dark);
+
+        font-size: 25px;
+        font-weight: 850;
+    }
+
+    .stat-card span {
+        display: block;
+
+        margin-top: 5px;
+
+        color: var(--course-muted);
+
+        font-size: 13px;
+    }
+
+    .course-filter-card {
+        padding: 22px;
+        margin-bottom: 25px;
+
+        border: 1px solid var(--course-border);
+        border-radius: 20px;
+
+        background: var(--course-white);
+
+        box-shadow:
+            0 10px 28px rgba(17, 24, 39, 0.05);
+    }
+
+    .filter-heading {
+        margin-bottom: 17px;
+    }
+
+    .filter-heading h2 {
+        margin: 0;
+
+        color: var(--course-dark);
+
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .filter-heading p {
+        margin: 5px 0 0;
+
+        color: var(--course-muted);
+
+        font-size: 13px;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: 1.7fr repeat(4, 1fr) auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .form-group label {
+        display: block;
+
+        margin-bottom: 7px;
+
+        color: var(--course-text);
+
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .form-control {
+        width: 100%;
+        height: 44px;
+
+        padding: 0 13px;
+
+        color: var(--course-text);
+
+        font-size: 13px;
+
+        border: 1px solid var(--course-border);
+        border-radius: 11px;
+        outline: none;
+
+        background: #fbfcff;
+
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--course-primary);
+
+        box-shadow:
+            0 0 0 3px rgba(79, 70, 229, 0.11);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-btn {
+        height: 44px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+
+        padding: 0 16px;
+
+        font-size: 13px;
+        font-weight: 750;
+
+        border: 0;
+        border-radius: 11px;
+
+        cursor: pointer;
+        text-decoration: none;
+
+        white-space: nowrap;
+    }
+
+    .apply-btn {
+        color: white;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--course-primary),
+                var(--course-secondary)
+            );
+    }
+
+    .reset-btn {
+        color: var(--course-text);
+
+        border: 1px solid var(--course-border);
+
+        background: white;
+    }
+
+    .results-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+
+        margin-bottom: 17px;
+    }
+
+    .results-heading h2 {
+        margin: 0;
+
+        color: var(--course-dark);
+
+        font-size: 20px;
+        font-weight: 850;
+    }
+
+    .results-heading p {
+        margin: 5px 0 0;
+
+        color: var(--course-muted);
+
+        font-size: 13px;
+    }
+
+    .results-count {
+        padding: 7px 12px;
+
+        color: var(--course-primary);
+
+        font-size: 12px;
+        font-weight: 800;
+
+        border-radius: 20px;
+
+        background: #eef2ff;
+    }
+
+    .course-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .course-card {
+        position: relative;
+
+        display: flex;
+        flex-direction: column;
+
+        min-height: 100%;
+
+        overflow: hidden;
+
+        border: 1px solid var(--course-border);
+        border-radius: 18px;
+
+        background: var(--course-white);
+
+        box-shadow:
+            0 9px 26px rgba(17, 24, 39, 0.05);
+
+        transition:
+            transform 0.22s ease,
+            box-shadow 0.22s ease;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+
+        box-shadow:
+            0 17px 38px rgba(17, 24, 39, 0.10);
+    }
+
+    .course-card-top {
+        height: 6px;
+
+        background:
+            linear-gradient(
+                90deg,
+                var(--course-primary),
+                var(--course-secondary)
+            );
+    }
+
+    .course-card-body {
+        flex: 1;
+
+        display: flex;
+        flex-direction: column;
+
+        padding: 19px;
+    }
+
+    .course-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+
+        margin-bottom: 13px;
+    }
+
+    .course-icon {
+        min-width: 43px;
+        height: 43px;
+
+        display: grid;
+        place-items: center;
+
+        font-size: 21px;
+
+        border-radius: 12px;
+
+        background: #eef2ff;
+    }
+
+    .price-badge {
+        padding: 6px 10px;
+
+        font-size: 11px;
+        font-weight: 850;
+
+        border-radius: 20px;
+    }
+
+    .free-badge {
+        color: #166534;
+        background: var(--course-success-light);
+    }
+
+    .paid-badge {
+        color: #92400e;
+        background: var(--course-warning-light);
+    }
+
+    .course-title {
+        margin: 0 0 6px;
+
+        color: var(--course-dark);
+
+        font-size: 16px;
+        font-weight: 850;
+        line-height: 1.4;
+    }
+
+    .course-provider {
+        margin: 0 0 13px;
+
+        color: var(--course-primary);
+
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .course-description {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+
+        min-height: 60px;
+
+        margin: 0 0 15px;
+
+        color: var(--course-muted);
+
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .course-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+
+        margin-bottom: 16px;
+    }
+
+    .meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+
+        padding: 6px 9px;
+
+        color: var(--course-text);
+
+        font-size: 11px;
+        font-weight: 700;
+
+        border: 1px solid var(--course-border);
+        border-radius: 20px;
+
+        background: #f9fafb;
+    }
+
+    .course-info-list {
+        display: grid;
+        gap: 9px;
+
+        margin-top: auto;
+        margin-bottom: 17px;
+    }
+
+    .course-info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+
+        padding-bottom: 8px;
+
+        color: var(--course-muted);
+
+        font-size: 12px;
+
+        border-bottom: 1px solid #f0f1f4;
+    }
+
+    .course-info-row strong {
+        color: var(--course-text);
+        text-align: right;
+    }
+
+    .open-course-btn {
+        width: 100%;
+        height: 42px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+
+        color: white;
+
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+
+        border-radius: 11px;
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--course-primary),
+                var(--course-secondary)
+            );
+
+        transition:
+            transform 0.2s ease,
+            opacity 0.2s ease;
+    }
+
+    .open-course-btn:hover {
+        color: white;
+        opacity: 0.94;
+        transform: translateY(-1px);
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+
+        padding: 50px 20px;
+
+        text-align: center;
+
+        border: 1px dashed #cbd5e1;
+        border-radius: 18px;
+
+        background: white;
+    }
+
+    .empty-state-icon {
+        margin-bottom: 13px;
+
+        font-size: 42px;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 7px;
+
+        color: var(--course-dark);
+
+        font-size: 19px;
+    }
+
+    .empty-state p {
+        margin: 0 0 17px;
+
+        color: var(--course-muted);
+
+        font-size: 14px;
+    }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 7px;
+
+        margin-top: 28px;
+    }
+
+    .page-link {
+        min-width: 40px;
+        height: 40px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 0 11px;
+
+        color: var(--course-text);
+
+        font-size: 13px;
+        font-weight: 750;
+        text-decoration: none;
+
+        border: 1px solid var(--course-border);
+        border-radius: 10px;
+
+        background: white;
+    }
+
+    .page-link:hover {
+        color: var(--course-primary);
+        border-color: var(--course-primary);
+    }
+
+    .page-link.active {
+        color: white;
+
+        border-color: var(--course-primary);
+
+        background:
+            linear-gradient(
+                135deg,
+                var(--course-primary),
+                var(--course-secondary)
+            );
+    }
+
+    .page-link.disabled {
+        color: #9ca3af;
+        pointer-events: none;
+        background: #f3f4f6;
+    }
+
+    @media (max-width: 1100px) {
+        .filter-form {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .course-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 800px) {
+        .course-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-form {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-actions {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .courses-page {
+            padding-top: 20px;
+        }
+
+        .courses-hero {
+            padding: 27px 21px;
+        }
+
+        .course-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-btn {
+            width: 100%;
+        }
+
+        .course-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .results-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="courses-page">
+    <div class="courses-container">
+
+        <section class="courses-hero">
+            <div class="hero-content">
+
+                <div class="hero-label">
+                    🎓 Curated Learning Resources
+                </div>
+
+                <h1>Explore Courses</h1>
+
+                <p>
+                    Browse learning resources based on technical skills,
+                    experience level, provider and course type. Improve
+                    missing skills and become ready for your target role.
+                </p>
+
+            </div>
+        </section>
+
+        <section class="course-stats">
+
+            <article class="stat-card">
+                <strong>{{ total_courses }}</strong>
+                <span>Total Active Courses</span>
+            </article>
+
+            <article class="stat-card">
+                <strong>{{ free_courses_count }}</strong>
+                <span>Free Courses</span>
+            </article>
+
+            <article class="stat-card">
+                <strong>{{ paid_courses_count }}</strong>
+                <span>Paid Courses</span>
+            </article>
+
+            <article class="stat-card">
+                <strong>{{ filtered_courses_count }}</strong>
+                <span>Current Results</span>
+            </article>
+
+        </section>
+
+        <section class="course-filter-card">
+
+            <div class="filter-heading">
+                <h2>Search and Filter Courses</h2>
+
+                <p>
+                    Find the most relevant course for your learning goal.
+                </p>
+            </div>
+
+            <form
+                method="get"
+                action="{% url 'courses' %}"
+                class="filter-form"
+            >
+
+                <div class="form-group">
+                    <label for="course-search">
+                        Search
+                    </label>
+
+                    <input
+                        id="course-search"
+                        type="text"
+                        name="q"
+                        value="{{ search_query }}"
+                        placeholder="Course, skill or provider..."
+                        class="form-control"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="skill-filter">
+                        Skill
+                    </label>
+
+                    <select
+                        id="skill-filter"
+                        name="skill"
+                        class="form-control"
+                    >
+                        <option value="">
+                            All Skills
+                        </option>
+
+                        {% for skill in skills %}
+                            <option
+                                value="{{ skill.id }}"
+                                {% if selected_skill == skill.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ skill.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="level-filter">
+                        Level
+                    </label>
+
+                    <select
+                        id="level-filter"
+                        name="level"
+                        class="form-control"
+                    >
+                        <option value="">
+                            All Levels
+                        </option>
+
+                        {% for value, label in level_choices %}
+                            <option
+                                value="{{ value }}"
+                                {% if selected_level == value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="provider-filter">
+                        Provider
+                    </label>
+
+                    <select
+                        id="provider-filter"
+                        name="provider"
+                        class="form-control"
+                    >
+                        <option value="">
+                            All Providers
+                        </option>
+
+                        {% for provider in providers %}
+                            <option
+                                value="{{ provider }}"
+                                {% if selected_provider == provider %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ provider }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="price-filter">
+                        Course Type
+                    </label>
+
+                    <select
+                        id="price-filter"
+                        name="price_type"
+                        class="form-control"
+                    >
+                        <option value="">
+                            Free and Paid
+                        </option>
+
+                        <option
+                            value="free"
+                            {% if selected_price_type == "free" %}
+                                selected
+                            {% endif %}
+                        >
+                            Free Only
+                        </option>
+
+                        <option
+                            value="paid"
+                            {% if selected_price_type == "paid" %}
+                                selected
+                            {% endif %}
+                        >
+                            Paid Only
+                        </option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="filter-btn apply-btn"
+                    >
+                        🔍 Apply
+                    </button>
+
+                    <a
+                        href="{% url 'courses' %}"
+                        class="filter-btn reset-btn"
+                    >
+                        Reset
+                    </a>
+
+                </div>
+
+            </form>
+        </section>
+
+        <section>
+
+            <div class="results-heading">
+                <div>
+                    <h2>Available Courses</h2>
+
+                    <p>
+                        Showing courses matching your selected filters.
+                    </p>
+                </div>
+
+                <span class="results-count">
+                    {{ filtered_courses_count }} result{{ filtered_courses_count|pluralize }}
+                </span>
+            </div>
+
+            <div class="course-grid">
+
+                {% for course in courses %}
+
+                    <article class="course-card">
+
+                        <div class="course-card-top"></div>
+
+                        <div class="course-card-body">
+
+                            <div class="course-card-header">
+
+                                <div class="course-icon">
+                                    🎓
+                                </div>
+
+                                {% if course.is_free %}
+                                    <span class="price-badge free-badge">
+                                        FREE
+                                    </span>
+                                {% else %}
+                                    <span class="price-badge paid-badge">
+                                        PAID
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                            <h3 class="course-title">
+                                {{ course.title }}
+                            </h3>
+
+                            <p class="course-provider">
+                                {{ course.provider }}
+                            </p>
+
+                            <p class="course-description">
+                                {{ course.description|default:"Develop practical knowledge and strengthen your technical skills through this learning resource." }}
+                            </p>
+
+                            <div class="course-meta">
+
+                                <span class="meta-badge">
+                                    🛠 {{ course.skill.name }}
+                                </span>
+
+                                <span class="meta-badge">
+                                    📊 {{ course.get_level_display }}
+                                </span>
+
+                                {% if course.rating %}
+                                    <span class="meta-badge">
+                                        ⭐ {{ course.rating }}
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="course-info-list">
+
+                                <div class="course-info-row">
+                                    <span>Duration</span>
+
+                                    <strong>
+                                        {{ course.duration|default:"Self-paced" }}
+                                    </strong>
+                                </div>
+
+                                <div class="course-info-row">
+                                    <span>Course Type</span>
+
+                                    <strong>
+                                        {% if course.is_free %}
+                                            Free
+                                        {% else %}
+                                            Paid
+                                        {% endif %}
+                                    </strong>
+                                </div>
+
+                                {% if not course.is_free and course.price %}
+                                    <div class="course-info-row">
+                                        <span>Price</span>
+
+                                        <strong>
+                                            ${{ course.price }}
+                                        </strong>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                            <a
+                                href="{{ course.course_url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="open-course-btn"
+                            >
+                                Open Course ↗
+                            </a>
+
+                        </div>
+                    </article>
+
+                {% empty %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            🔎
+                        </div>
+
+                        <h3>No courses found</h3>
+
+                        <p>
+                            Try changing or resetting the selected
+                            search filters.
+                        </p>
+
+                        <a
+                            href="{% url 'courses' %}"
+                            class="filter-btn apply-btn"
+                        >
+                            View All Courses
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% if page_obj.paginator.num_pages > 1 %}
+
+                <nav class="pagination-wrapper">
+
+                    {% if page_obj.has_previous %}
+
+                        <a
+                            class="page-link"
+                            href="?page=1&q={{ search_query|urlencode }}&skill={{ selected_skill }}&level={{ selected_level }}&provider={{ selected_provider|urlencode }}&price_type={{ selected_price_type }}"
+                        >
+                            First
+                        </a>
+
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.previous_page_number }}&q={{ search_query|urlencode }}&skill={{ selected_skill }}&level={{ selected_level }}&provider={{ selected_provider|urlencode }}&price_type={{ selected_price_type }}"
+                        >
+                            ‹
+                        </a>
+
+                    {% else %}
+
+                        <span class="page-link disabled">
+                            First
+                        </span>
+
+                        <span class="page-link disabled">
+                            ‹
+                        </span>
+
+                    {% endif %}
+
+                    {% for page_number in page_obj.paginator.page_range %}
+
+                        {% if page_number >= page_obj.number|add:"-2" and page_number <= page_obj.number|add:"2" %}
+
+                            {% if page_number == page_obj.number %}
+
+                                <span class="page-link active">
+                                    {{ page_number }}
+                                </span>
+
+                            {% else %}
+
+                                <a
+                                    class="page-link"
+                                    href="?page={{ page_number }}&q={{ search_query|urlencode }}&skill={{ selected_skill }}&level={{ selected_level }}&provider={{ selected_provider|urlencode }}&price_type={{ selected_price_type }}"
+                                >
+                                    {{ page_number }}
+                                </a>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.next_page_number }}&q={{ search_query|urlencode }}&skill={{ selected_skill }}&level={{ selected_level }}&provider={{ selected_provider|urlencode }}&price_type={{ selected_price_type }}"
+                        >
+                            ›
+                        </a>
+
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.paginator.num_pages }}&q={{ search_query|urlencode }}&skill={{ selected_skill }}&level={{ selected_level }}&provider={{ selected_provider|urlencode }}&price_type={{ selected_price_type }}"
+                        >
+                            Last
+                        </a>
+
+                    {% else %}
+
+                        <span class="page-link disabled">
+                            ›
+                        </span>
+
+                        <span class="page-link disabled">
+                            Last
+                        </span>
+
+                    {% endif %}
+
+                </nav>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+</div>
+
+{% endblock %}

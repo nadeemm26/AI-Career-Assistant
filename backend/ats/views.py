@@ -66,6 +66,7 @@ def analysis_result(request, resume_id):
         .prefetch_related(
             "missing_skills__skill",
             "recommendations",
+            "course_recommendations__course__skill",
         )
         .order_by("-score")
     )
@@ -92,6 +93,7 @@ def analysis_result(request, resume_id):
 
     missing_skills = []
     recommendations = []
+    course_recommendations = []
     required_skills = []
 
     if selected_score:
@@ -105,6 +107,20 @@ def analysis_result(request, resume_id):
             selected_score.recommendations
             .all()
             .order_by("priority")
+        )
+
+        course_recommendations = list(
+            selected_score.course_recommendations
+            .select_related(
+                "course",
+                "course__skill",
+            )
+            .filter(course__is_active=True)
+            .order_by(
+                "priority",
+                "-course__is_free",
+                "-course__rating",
+            )
         )
 
         required_skills = list(
@@ -167,6 +183,7 @@ def analysis_result(request, resume_id):
         "extracted_skills": extracted_skills,
         "missing_skills": missing_skills,
         "recommendations": recommendations,
+        "course_recommendations": course_recommendations,
         "skill_comparison": skill_comparison,
 
         "required_count": required_count,

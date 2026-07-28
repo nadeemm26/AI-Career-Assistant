@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'resume',
     'ats',
     'jobs',
+    'courses.apps.CoursesConfig',
     'reports',
     'core',
 ]
