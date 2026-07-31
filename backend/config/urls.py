@@ -43,6 +43,11 @@ urlpatterns = [
         "courses/",
         include("courses.urls"),
     ),
+
+    path(
+        "reports/",
+        include("reports.urls"),
+    ),
 ]
 
 

@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}
+Reports | AI Career Assistant
+{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --report-primary: #4f46e5;
+        --report-secondary: #7c3aed;
+        --report-dark: #111827;
+        --report-text: #374151;
+        --report-muted: #6b7280;
+        --report-border: #e5e7eb;
+        --report-bg: #f5f7fb;
+        --report-white: #ffffff;
+        --report-success: #16a34a;
+        --report-danger: #dc2626;
+        --report-warning: #d97706;
+    }
+
+    .reports-page {
+        min-height: 100vh;
+        padding: 38px 0 70px;
+        background:
+            radial-gradient(
+                circle at top right,
+                rgba(124, 58, 237, 0.10),
+                transparent 32%
+            ),
+            radial-gradient(
+                circle at top left,
+                rgba(79, 70, 229, 0.08),
+                transparent 30%
+            ),
+            var(--report-bg);
+    }
+
+    .reports-container {
+        width: min(1180px, 92%);
+        margin: auto;
+    }
+
+    .reports-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 35px;
+        margin-bottom: 24px;
+        color: white;
+        border-radius: 24px;
+        background:
+            linear-gradient(
+                135deg,
+                #3730a3,
+                var(--report-primary),
+                var(--report-secondary)
+            );
+        box-shadow:
+            0 22px 48px rgba(55, 48, 163, 0.20);
+    }
+
+    .reports-hero::before {
+        content: "";
+        position: absolute;
+        width: 210px;
+        height: 210px;
+        top: -110px;
+        right: -55px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.10);
+    }
+
+    .reports-hero h1 {
+        position: relative;
+        margin: 0 0 9px;
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 850;
+    }
+
+    .reports-hero p {
+        position: relative;
+        max-width: 680px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .report-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        padding: 20px;
+        border: 1px solid var(--report-border);
+        border-radius: 17px;
+        background: white;
+        box-shadow:
+            0 9px 25px rgba(17, 24, 39, 0.05);
+    }
+
+    .stat-card strong {
+        display: block;
+        color: var(--report-dark);
+        font-size: 26px;
+        font-weight: 850;
+    }
+
+    .stat-card span {
+        display: block;
+        margin-top: 5px;
+        color: var(--report-muted);
+        font-size: 13px;
+    }
+
+    .reports-card {
+        overflow: hidden;
+        border: 1px solid var(--report-border);
+        border-radius: 20px;
+        background: white;
+        box-shadow:
+            0 10px 30px rgba(17, 24, 39, 0.05);
+    }
+
+    .reports-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 22px;
+        border-bottom: 1px solid var(--report-border);
+    }
+
+    .reports-card-header h2 {
+        margin: 0;
+        color: var(--report-dark);
+        font-size: 20px;
+        font-weight: 850;
+    }
+
+    .reports-card-header p {
+        margin: 5px 0 0;
+        color: var(--report-muted);
+        font-size: 13px;
+    }
+
+    .new-report-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 16px;
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+        border-radius: 11px;
+        background:
+            linear-gradient(
+                135deg,
+                var(--report-primary),
+                var(--report-secondary)
+            );
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .reports-table {
+        width: 100%;
+        min-width: 850px;
+        border-collapse: collapse;
+    }
+
+    .reports-table th,
+    .reports-table td {
+        padding: 15px 18px;
+        text-align: left;
+        border-bottom: 1px solid var(--report-border);
+    }
+
+    .reports-table th {
+        color: var(--report-muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        background: #f9fafb;
+    }
+
+    .reports-table td {
+        color: var(--report-text);
+        font-size: 13px;
+    }
+
+    .file-name {
+        max-width: 260px;
+        color: var(--report-dark);
+        font-weight: 750;
+        word-break: break-word;
+    }
+
+    .status-badge,
+    .type-badge {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .status-generated {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .status-pending {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .status-failed {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .type-badge {
+        color: #4338ca;
+        background: #eef2ff;
+    }
+
+    .action-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 11px;
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: none;
+        border: 0;
+        border-radius: 9px;
+        cursor: pointer;
+    }
+
+    .download-btn {
+        color: white;
+        background: var(--report-success);
+    }
+
+    .delete-btn {
+        color: white;
+        background: var(--report-danger);
+    }
+
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        margin-bottom: 14px;
+        font-size: 45px;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 7px;
+        color: var(--report-dark);
+        font-size: 20px;
+    }
+
+    .empty-state p {
+        margin: 0 0 18px;
+        color: var(--report-muted);
+        font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+        .report-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .reports-page {
+            padding-top: 20px;
+        }
+
+        .reports-hero {
+            padding: 27px 21px;
+        }
+
+        .report-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .reports-card-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="reports-page">
+    <div class="reports-container">
+
+        <section class="reports-hero">
+            <h1>ATS Reports</h1>
+
+            <p>
+                Generate, manage and download professional PDF reports
+                containing ATS scores, extracted skills, missing skills,
+                recommendations and learning resources.
+            </p>
+        </section>
+
+        <section class="report-stats">
+
+            <article class="stat-card">
+                <strong>{{ total_reports }}</strong>
+                <span>Total Reports</span>
+            </article>
+
+            <article class="stat-card">
+                <strong>{{ generated_reports }}</strong>
+                <span>Generated Successfully</span>
+            </article>
+
+            <article class="stat-card">
+                <strong>{{ pdf_reports }}</strong>
+                <span>PDF Reports</span>
+            </article>
+
+            <article class="stat-card">
+                <strong>{{ failed_reports }}</strong>
+                <span>Failed Reports</span>
+            </article>
+
+        </section>
+
+        <section class="reports-card">
+
+            <div class="reports-card-header">
+                <div>
+                    <h2>Report History</h2>
+
+                    <p>
+                        Your previously generated ATS analysis reports.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'ats:analysis_list' %}"
+                    class="new-report-btn"
+                >
+                    Generate New Report
+                </a>
+            </div>
+
+            {% if reports %}
+
+                <div class="table-wrapper">
+                    <table class="reports-table">
+
+                        <thead>
+                            <tr>
+                                <th>Resume</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Generated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for report in reports %}
+
+                                <tr>
+                                    <td>
+                                        <div class="file-name">
+                                            {{ report.resume.original_filename }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="type-badge">
+                                            {{ report.get_report_type_display }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge status-{{ report.status }}">
+                                            {{ report.get_status_display }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        {{ report.created_at|date:"d M Y, h:i A" }}
+                                    </td>
+
+                                    <td>
+                                        {% if report.generated_at %}
+                                            {{ report.generated_at|date:"d M Y, h:i A" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <div class="action-group">
+
+                                            {% if report.status == "generated" and report.report_file %}
+
+                                                <a
+                                                    href="{% url 'reports:download_report' report.id %}"
+                                                    class="action-btn download-btn"
+                                                >
+                                                    Download
+                                                </a>
+
+                                            {% endif %}
+
+                                            <form
+                                                method="post"
+                                                action="{% url 'reports:delete_report' report.id %}"
+                                                onsubmit="return confirm('Delete this report?');"
+                                            >
+                                                {% csrf_token %}
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-btn delete-btn"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        📄
+                    </div>
+
+                    <h3>No reports generated yet</h3>
+
+                    <p>
+                        Open an analyzed resume and generate your
+                        first professional ATS PDF report.
+                    </p>
+
+                    <a
+                        href="{% url 'ats:analysis_list' %}"
+                        class="new-report-btn"
+                    >
+                        View ATS Analyses
+                    </a>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+</div>
+
+{% endblock %}

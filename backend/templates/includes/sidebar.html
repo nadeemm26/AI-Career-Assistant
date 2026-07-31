@@ -110,13 +110,9 @@
             <li class="nav-item">
 
                 <a
-                    class="nav-link
-                    {% if request.resolver_match.url_name == 'reports' %}
-                        active
-                    {% endif %}"
-                    href="{% url 'reports' %}"
+                    class="nav-link {% if request.resolver_match.namespace == 'reports' %}active{% endif %}"
+                    href="{% url 'reports:report_list' %}"
                 >
-
                     <span class="menu-icon">
                         <i class="bi bi-file-earmark-bar-graph-fill"></i>
                     </span>

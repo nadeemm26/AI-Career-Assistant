@@ -35,3 +35,9 @@ dist/
 # Coverage
 .coverage
 htmlcov/
+
+# IDE
+.idea/
+
+# Environment files
+.env.*

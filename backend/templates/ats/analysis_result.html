@@ -1534,17 +1534,44 @@ AI Resume Analysis Report
                     </div>
 
                     <div class="action-row">
+
+                        <form
+                            method="post"
+                            action="{% url 'reports:generate_pdf' resume.id %}"
+                            style="margin: 0;"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="action-btn primary-btn"
+                                style="border: none; cursor: pointer;"
+                            >
+                                📄 Generate PDF Report
+                            </button>
+                        </form>
+
+                        <a
+                            href="{% url 'reports:report_list' %}"
+                            class="action-btn secondary-btn"
+                        >
+                            📑 View Reports
+                        </a>
+
                         <a
                             href="{% url 'resume:upload_resume' %}"
-                            class="action-btn primary-btn">
+                            class="action-btn secondary-btn"
+                        >
                             Upload New Resume
                         </a>
 
                         <a
                             href="{% url 'resume:resume_list' %}"
-                            class="action-btn secondary-btn">
+                            class="action-btn secondary-btn"
+                        >
                             My Resumes
                         </a>
+
                     </div>
                 </section>
 

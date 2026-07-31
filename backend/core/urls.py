@@ -15,10 +15,4 @@ urlpatterns = [
         views.job_roles,
         name="job_roles",
     ),
-
-    path(
-        "reports/",
-        views.reports,
-        name="reports",
-    ),
 ]
